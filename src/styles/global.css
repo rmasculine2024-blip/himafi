@@ -30,6 +30,12 @@
 .navbar {
   @apply fixed top-6 w-full flex justify-center z-50;
 }
+
+/* Navbar fixed tingginya ~6.5rem (top-6 + tinggi pill). Tanpa ini, tiap
+   anchor (#structure, #LITBANGProgram, dst) mendarat tepat di balik navbar. */
+[id] {
+  scroll-margin-top: 7rem;
+}
 .nav-container {
   @apply bg-neutralwhite rounded-full box-border flex items-center justify-between shadow-lg px-6 py-3 w-9/10 lg:w-4/5 lg:h-20 md:justify-normal md:gap-10;
 }

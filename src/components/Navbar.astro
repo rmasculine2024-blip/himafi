@@ -1,7 +1,23 @@
 ---
 import himafiLogo from "../assets/logo/himafi.png";
 import { Image } from "astro:assets";
-const currentPath = Astro.url.pathname;
+
+// Astro membangun URL dengan trailing slash ("/about/"), jadi perbandingan
+// mentah terhadap "/about" tidak pernah cocok. Normalkan dulu.
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+
+const menu = [
+  { href: "/", label: "Beranda" },
+  { href: "/about", label: "Tentang" },
+  { href: "/news", label: "Berita" },
+  { href: "/contact", label: "Kontak" },
+  { href: "/utility", label: "Utilitas", hidden: true },
+];
+
+// Halaman turunan ikut menyalakan induknya: /about/litbang -> Tentang,
+// /news/raker -> Berita.
+const isActive = (href: string) =>
+  href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
 ---
 
 <nav
@@ -22,45 +38,19 @@ const currentPath = Astro.url.pathname;
     <!-- Menu Desktop -->
     <div class="hidden md:flex">
       <ul class="flex gap-8">
-        <li>
-          <a
-            href="/"
-            class={`a-menu ${currentPath === "/" ? "bg-primary text-neutralwhite" : ""}`}
-            aria-current={currentPath === "/" ? "page" : undefined}>Beranda</a
-          >
-        </li>
-        <li>
-          <a
-            href="/about"
-            class={`a-menu ${currentPath === "/about" ? "bg-primary text-neutralwhite" : ""}`}
-            aria-current={currentPath === "/about" ? "page" : undefined}
-            >Tentang</a
-          >
-        </li>
-        <li>
-          <a
-            href="/news"
-            class={`a-menu ${currentPath === "/news" ? "bg-primary text-neutralwhite" : ""}`}
-            aria-current={currentPath === "/news" ? "page" : undefined}
-            >Berita</a
-          >
-        </li>
-        <li>
-          <a
-            href="/contact"
-            class={`a-menu ${currentPath === "/contact" ? "bg-primary text-neutralwhite" : ""}`}
-            aria-current={currentPath === "/contact" ? "page" : undefined}
-            >Kontak</a
-          >
-        </li>
-        <li class="hidden">
-          <a
-            href="/utility"
-            class={`a-menu ${currentPath === "/utility" ? "bg-primary text-neutralwhite" : ""}`}
-            aria-current={currentPath === "/utility" ? "page" : undefined}
-            >Utilitas</a
-          >
-        </li>
+        {
+          menu.map(({ href, label, hidden }) => (
+            <li class={hidden ? "hidden" : undefined}>
+              <a
+                href={href}
+                class={`a-menu ${isActive(href) ? "bg-primary text-neutralwhite" : ""}`}
+                aria-current={isActive(href) ? "page" : undefined}
+              >
+                {label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </div>
 
@@ -70,9 +60,10 @@ const currentPath = Astro.url.pathname;
         type="button"
         id="hamburger"
         aria-expanded="false"
-        class="relative inline-flex items-center justify-center rounded-md p-2 text-primary hover:bg-primary/10 hover:text-primary-darken focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-darken"
+        aria-controls="mobile-menu"
+        class="relative inline-flex items-center justify-center rounded-md p-2 text-primary hover:bg-primary/10 hover:text-primary-darken"
       >
-        <span class="sr-only">Open main menu</span>
+        <span class="sr-only">Buka menu utama</span>
         <!-- Ikon Garis Tiga (Menu) -->
         <svg
           id="icon-menu"
@@ -117,91 +108,79 @@ const currentPath = Astro.url.pathname;
     <div
       class="bg-neutralwhite rounded-2xl shadow-xl ring-1 ring-primary/10 px-4 pt-2 pb-4 space-y-2"
     >
-      <a
-        href="/"
-        class="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 hover:text-primary-darken"
-        >Beranda</a
-      >
-      <a
-        href="/about"
-        class="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 hover:text-primary-darken"
-        >Tentang</a
-      >
-      <a
-        href="/news"
-        class="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 hover:text-primary-darken"
-        >Berita</a
-      >
-      <a
-        href="/contact"
-        class="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 hover:text-primary-darken"
-        >Kontak</a
-      >
-      <a
-        href="/utility"
-        class="hidden px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-primary/10 hover:text-primary-darken "
-        >Utilitas</a
-      >
+      {
+        menu.map(({ href, label, hidden }) => (
+          <a
+            href={href}
+            class={`${hidden ? "hidden" : "block"} px-3 py-2 rounded-md text-base font-medium ${
+              isActive(href)
+                ? "bg-primary text-neutralwhite"
+                : "text-primary hover:bg-primary/10 hover:text-primary-darken"
+            }`}
+            aria-current={isActive(href) ? "page" : undefined}
+          >
+            {label}
+          </a>
+        ))
+      }
     </div>
   </div>
   <!-- Akhir Blok Mobile Menu -->
 </nav>
 
 <script>
-  function init() {
-    // === Hamburger Menu ===
-    const btnHamburger = document.getElementById(
-      "hamburger",
-    ) as HTMLButtonElement;
-    const mobileMenu = document.getElementById("mobile-menu") as HTMLElement;
-    const iconMenu = document.getElementById("icon-menu") as HTMLElement;
-    const iconClose = document.getElementById("icon-close") as HTMLElement;
-    const navbar = document.querySelector("nav") as HTMLElement;
+  // Elemen dicari ulang tiap dipakai karena View Transitions mengganti DOM,
+  // sementara script modul ini cuma dieksekusi sekali.
+  const el = (id: string) => document.getElementById(id);
 
-    if (!btnHamburger || !mobileMenu || !iconMenu || !iconClose || !navbar)
-      return;
+  function closeMobileMenu() {
+    el("mobile-menu")?.classList.add("hidden");
+    el("icon-menu")?.classList.remove("hidden");
+    el("icon-close")?.classList.add("hidden");
+    el("hamburger")?.setAttribute("aria-expanded", "false");
+  }
 
-    // Clone button untuk cegah double event listener
-    const newBtn = btnHamburger.cloneNode(true) as HTMLButtonElement;
-    btnHamburger.parentNode!.replaceChild(newBtn, btnHamburger);
+  // === Hide on Scroll Down, Show on Scroll Up ===
+  // Didaftarkan SEKALI di level modul. Versi sebelumnya memanggil
+  // removeEventListener dengan referensi fungsi yang baru dibuat, jadi tidak
+  // menghapus apa pun dan listener menumpuk tiap navigasi client-side.
+  let lastScrollY = window.scrollY;
 
-    newBtn.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
-      iconMenu.classList.toggle("hidden");
-      iconClose.classList.toggle("hidden");
-      iconClose.classList.toggle("block");
+  window.addEventListener(
+    "scroll",
+    () => {
+      const navbar = document.querySelector("nav");
+      if (!navbar) return;
 
-      const isExpanded = newBtn.getAttribute("aria-expanded") === "true";
-      newBtn.setAttribute("aria-expanded", String(!isExpanded));
-    });
-
-    // === Hide on Scroll Down, Show on Scroll Up ===
-    let lastScrollY = window.scrollY;
-
-    // Clone window scroll juga biar tidak numpuk tiap navigasi
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+      const y = window.scrollY;
+      if (y > lastScrollY && y > 80) {
         navbar.style.transform = "translateY(-150%)";
-        mobileMenu.classList.add("hidden");
-        iconMenu.classList.remove("hidden");
-        iconClose.classList.add("hidden");
+        closeMobileMenu();
       } else {
         navbar.style.transform = "translateY(0)";
       }
+      lastScrollY = y;
+    },
+    { passive: true },
+  );
 
-      lastScrollY = currentScrollY;
-    };
+  // === Hamburger ===
+  // astro:page-load jalan di initial load dan tiap selesai navigasi. Tombolnya
+  // elemen baru tiap kali, jadi listener-nya tidak pernah dobel.
+  document.addEventListener("astro:page-load", () => {
+    const btn = el("hamburger");
+    if (!btn) return;
 
-    // Hapus scroll listener lama sebelum pasang baru
-    window.removeEventListener("scroll", handleScroll);
-    window.addEventListener("scroll", handleScroll);
-  }
-
-  // First load
-  init();
-
-  // Setelah navigasi antar halaman (View Transitions)
-  document.addEventListener("astro:after-swap", init);
+    btn.addEventListener("click", () => {
+      const isOpen = btn.getAttribute("aria-expanded") === "true";
+      if (isOpen) {
+        closeMobileMenu();
+      } else {
+        el("mobile-menu")?.classList.remove("hidden");
+        el("icon-menu")?.classList.add("hidden");
+        el("icon-close")?.classList.remove("hidden");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
 </script>
