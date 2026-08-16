@@ -17,5 +17,12 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [mdx(), sitemap()]
+  integrations: [
+    mdx(),
+    sitemap({
+      // /utility masih placeholder "under construction" — jangan disubmit
+      // ke mesin pencari sebagai halaman kosong.
+      filter: (page) => !page.includes('/utility'),
+    }),
+  ]
 });

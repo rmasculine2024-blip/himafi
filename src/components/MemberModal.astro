@@ -7,6 +7,9 @@ import instagramIcon from "../assets/logo/instagram.svg?raw";
 
 <div
   id="member-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-name"
   class="fixed inset-0 bg-neutralblack/60 backdrop-blur-sm z-50 items-center justify-center p-4 md:p-10"
   style="display: none"
 >
@@ -130,14 +133,45 @@ import instagramIcon from "../assets/logo/instagram.svg?raw";
     if (!modal) return;
     modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+    el("close-modal")?.focus();
   }
+
+  // Kartu yang membuka modal, supaya fokus bisa dikembalikan ke sana saat
+  // ditutup — kalau tidak, pengguna keyboard terlempar ke awal halaman.
+  let lastTrigger: HTMLElement | null = null;
 
   function closeMemberModal() {
     const modal = el("member-modal");
-    if (!modal) return;
+    if (!modal || modal.style.display === "none") return;
     modal.style.display = "none";
     document.body.style.overflow = "";
+    lastTrigger?.focus();
+    lastTrigger = null;
   }
+
+  // Kurung Tab di dalam modal selama terbuka
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+    const modal = el("member-modal");
+    if (!modal || modal.style.display === "none") return;
+
+    const focusables = modal.querySelectorAll<HTMLElement>(
+      'a[href], button, [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement;
+
+    if (e.shiftKey && (active === first || !modal.contains(active))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || !modal.contains(active))) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 
   // Event delegation di document — tidak butuh re-attach setelah View Transitions
   document.addEventListener("click", (e) => {
@@ -145,6 +179,7 @@ import instagramIcon from "../assets/logo/instagram.svg?raw";
 
     const memberCard = t.closest<HTMLElement>("[data-member]");
     if (memberCard?.dataset.member) {
+      lastTrigger = memberCard;
       showMember(JSON.parse(memberCard.dataset.member));
       return;
     }

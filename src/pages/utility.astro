@@ -4,6 +4,9 @@ import Handler from "../components/underwork.astro";
 const Pagetitle = `Utilitas`;
 ---
 
-<Layout Pagetitle={Pagetitle}>
+<!-- Halaman placeholder, isinya belum ada. Di-noindex dan dikeluarkan dari
+     sitemap (lihat astro.config.mjs) supaya tidak disubmit ke mesin pencari
+     sebagai halaman kosong. Hapus saja kalau memang tidak jadi dipakai. -->
+<Layout Pagetitle={Pagetitle} noindex>
   <Handler />
 </Layout>

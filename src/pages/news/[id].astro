@@ -21,9 +21,13 @@ export async function getStaticPaths() {
 const { report } = Astro.props;
 const {Content} = await render(report);
 import { docImages, authorImages, findImage } from "../../utils/image";
-import { formatDate } from "../../utils/date";
+import { formatDate, sortNewsByDate } from "../../utils/date";
 const docImg = findImage(docImages, report.data.img);
 const authorImg = findImage(authorImages, report.data.authorPic);
+
+// "Artikel Lainnya" sebelumnya memakai koleksi mentah: urutannya acak dan
+// artikel yang sedang dibaca ikut terdaftar di dalamnya.
+const otherNews = sortNewsByDate(news).filter((n) => n.id !== report.id);
 
 
 
@@ -66,7 +70,7 @@ const authorImg = findImage(authorImages, report.data.authorPic);
   </div>
 
   <!-- ░░ KONTEN UTAMA ░░ -->
-  <main class="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="flex flex-col lg:flex-row gap-10">
       <!-- ══ KOLOM KIRI: ARTIKEL ══ -->
       <article class="flex-1 min-w-0">
@@ -165,11 +169,11 @@ const authorImg = findImage(authorImages, report.data.authorPic);
           </div>
 
           <div class="flex flex-col gap-4">
-          {news.map((report) => <ArticleCard report={report} />)}
-          {news.length < 1 && <Paragraph text="Ga ada berita kawan " />}
+          {otherNews.map((item) => <ArticleCard report={item} />)}
+          {otherNews.length < 1 && <Paragraph text="Belum ada artikel lain." />}
             </div>
         </div>
       </aside>
     </div>
-  </main>
+  </div>
 </Layout>

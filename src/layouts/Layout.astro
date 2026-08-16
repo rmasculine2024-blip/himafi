@@ -1,13 +1,13 @@
 ---
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
-import { Image } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import Navbar from "../components/Navbar.astro";
 const {
   Pagetitle = "HIMAFI",
   description = "HIMAFI UIN Syarif Hidayatullah Jakarta...",
   image = "/himafi.png",
+  noindex = false,
 } = Astro.props;
 
 // og:image wajib URL absolut — kalau relatif, WhatsApp/Instagram/Twitter
@@ -23,6 +23,7 @@ const canonical = new URL(Astro.url.pathname, base).href;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={`${Pagetitle} | HIMAFI`} />
     <meta property="og:description" content={description} />
@@ -49,8 +50,16 @@ const canonical = new URL(Astro.url.pathname, base).href;
   </head>
   <body>
     <div class="[overflow-x:clip] w-full">
+      <a
+        href="#main"
+        class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-full focus:bg-primary-darken focus:px-5 focus:py-3 focus:font-isi focus:font-semibold focus:text-secondary-bright"
+      >
+        Lompat ke konten
+      </a>
       <Navbar />
-      <slot />
+      <main id="main">
+        <slot />
+      </main>
       <Footer />
     </div>
     <ClientRouter />

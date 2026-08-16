@@ -12,13 +12,13 @@ export function formatDate(str: string) {
   });
 }
 
-export function sortNewsByDate(newsArray: any[]) {
-  return newsArray.sort((a, b) => {
-    const parseDate = (str: string) => {
-    const [d, m, y] = str.split("-");
-
-    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-  };
-  return parseDate(b.data.date).getTime() - parseDate(a.data.date).getTime();
-  })
+// Menyalin dulu: getCollection mengembalikan array yang dipakai bersama, jadi
+// .sort() langsung di atasnya mengubah urutan untuk semua pemanggil lain di
+// render yang sama.
+export function sortNewsByDate<T extends { data: { date: string } }>(
+  newsArray: T[],
+): T[] {
+  return [...newsArray].sort(
+    (a, b) => parseDate(b.data.date).getTime() - parseDate(a.data.date).getTime(),
+  );
 }
