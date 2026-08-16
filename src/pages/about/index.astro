@@ -1,42 +1,39 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Section from "../../components/Section.astro";
+import Container from "../../components/Container.astro";
 import H1 from "../../components/H1.astro";
 import CTA from "../../components/CTA.astro";
 import Paragraph from "../../components/Paragraph.astro";
 import BentoGrid from "../../components/BentoGrid.astro";
 import Structure from "../../components/Structure.astro";
+import MemberDirectory from "../../components/MemberDirectory.astro";
+import MemberModal from "../../components/MemberModal.astro";
 import fotoNeiya from "../../assets/member/bph-neiya.jpg";
 import fotoHarry from "../../assets/member/bph-harry.jpg";
 import MPKPO from "../../assets/structure/MPKPO.jpg";
 import H2 from "../../components/H2.astro";
 import logoHimafi from "../../assets/images/himafi.png";
 import { Image } from "astro:assets";
-import { getCollection } from "astro:content";
-const departments = await getCollection("departments");
 const title = `Tentang`;
 import HistorySection from "../../components/HistorySection.astro";
 ---
 
 <Layout Pagetitle={title}>
   <Section direct="about">
-    <div
-      class="flex flex-col w-full py-16 items-center lg:pt-42 pt-30 md:pt-30"
-    >
-      <div class="px-4 sm:px-8 md:px-16 lg:px-72 mb-6">
+    <div class="w-full py-28 md:py-32 flex flex-col items-center">
+      <Container width="prose" class="mb-10">
         <H1 text="TENTANG" mode="center" />
         <Paragraph
           text="HIMAFI merupakan organisasi yang berada dibawah Program Studi Fisika Fakultas Sains dan Teknologi Universitas Islam Negeri Syarif Hidayatullah Jakarta, yang memiliki garis koordinasi dengan Organisasi Legislatif dan Organisasi Eksekutif tingkat Fakultas Sains dan Teknologi Universitas Islam Negeri Syarif Hidayatullah Jakarta dan Ikatan Himpunan Mahasiswa Fisika Nasional. HIMAFI juga menyediakan wadah yang bermanfaat untuk mengembangkan sumber daya mahasiswa dan menampung segala aspirasi mahasiswa aktif Fisika UIN Syarif Hidayatullah Jakarta."
           mode="center"
         />
-      </div>
+      </Container>
       <BentoGrid />
     </div>
   </Section>
   <Section mode="dark" direct="vision">
-    <div
-      class="py-20 md:pt-36 px-10 md:px-16 lg:px-72 flex flex-col items-center justify-center"
-    >
+    <Container class="py-24 md:py-28 flex flex-col items-center justify-center">
       <div><H1 text="Kami berkomitmen pada" /></div>
       <div
         class="mt-20 flex flex-col md:flex-row gap-6 md:gap-16 justify-between items-center"
@@ -89,12 +86,12 @@ import HistorySection from "../../components/HistorySection.astro";
         Samanvaya dibawah ini
       </p>
       <CTA mode="dark" Href="/news/kabinetsamanvaya" />
-    </div>
+    </Container>
   </Section>
 
   <Section>
-    <div
-      class="w-full py-10 px-4 sm:px-8 md:px-16 lg:px-56 flex flex-col gap-10 items-center md:flex-row"
+    <Container
+      class="py-24 md:py-28 flex flex-col gap-10 items-center md:flex-row md:gap-12"
     >
       <div class="md:w-1/2">
         <H1 text="LOGO" />
@@ -128,17 +125,17 @@ import HistorySection from "../../components/HistorySection.astro";
           class="object-contain mx-auto shadow-lg rounded-full"
         />
       </div>
-    </div>
+    </Container>
   </Section>
 
   <HistorySection />
 
   <Section direct="structure" mode="light">
-    <div class="md:pt-24 pt-10">
-      <div
-        class="px-4 sm:px-8 md:px-16 lg:px-42 flex flex-col items-center md:py-10 pb-5 md:flex-row-reverse md:justify-between"
+    <div class="w-full">
+      <Container
+        class="pt-24 md:pt-28 pb-10 flex flex-col items-center gap-10 md:flex-row-reverse md:justify-between md:gap-12"
       >
-        <div class="p-6 md:w-1/2 md:flex md:flex-col">
+        <div class="md:w-1/2 flex flex-col">
           <H1 text="Struktur" />
           <Paragraph
             text=`"Dibalik setiap program kerja yang sukses, terdapat sinergi kuat dari
@@ -147,7 +144,7 @@ import HistorySection from "../../components/HistorySection.astro";
         bagi seluruh mahasiswa"`
           />
         </div>
-        <div class="flex flex-col md:flex-row md:pl-10 md:gap-10">
+        <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
           <div>
             <div class="rounded-2xl shadow-lg overflow-hidden appear-anim">
               <Image
@@ -179,30 +176,32 @@ import HistorySection from "../../components/HistorySection.astro";
             <p class="text-center font-isi">Hary Caesar Setiawan</p>
           </div>
         </div>
-      </div>
+      </Container>
 
-      <div class="px-6 md:py-10">
-        <div class="mx-auto px-6 pb-10 md:px-0 flex justify-center">
-          <span
-            class="font-bold px-3 font-heading text-center md:text-5xl lg:text-6xl md:px-9 text-4xl"
-            >Kepengurusan</span
-          >
-        </div>
+      <Container class="py-10">
+        <h2
+          class="font-bold font-heading text-center text-4xl md:text-5xl lg:text-6xl heading-accent mb-10"
+        >
+          Kepengurusan
+        </h2>
         <Structure />
-      </div>
+      </Container>
+
+      <MemberDirectory />
     </div>
   </Section>
+  <MemberModal />
   <Section mode="dark">
-    <div
-      class="w-full py-10 px-4 sm:px-8 md:px-16 lg:px-56 flex flex-col gap-10 items-center md:flex-row"
+    <Container
+      class="py-24 md:py-28 flex flex-col gap-10 items-center md:flex-row md:gap-12"
     >
       <div class="md:w-1/2">
         <H1 text="MPK" spanText="PO" />
         <H2 text="Majelis Pengawas dan Konsultasi Pengurus Organisasi" />
         <Paragraph
-          text=`Kabinet Samanvaya hadir sebagai poros stabilitas dan sinergitas HIMAFI UIN Syarif Hidayatullah Jakarta. Kami berkomitmen penuhmewujudkan tata kelola organisasi yang integratif, akuntabel, dan profesional untuk menjalin kolaborasi strategis dengan berbagai kemitraan.`
+          text=`Kabinet Samanvaya hadir sebagai poros stabilitas dan sinergitas HIMAFI UIN Syarif Hidayatullah Jakarta. Kami berkomitmen penuh mewujudkan tata kelola organisasi yang integratif, akuntabel, dan profesional untuk menjalin kolaborasi strategis dengan berbagai kemitraan.`
         />
-        <div class="w-fit mx-auto md:ml-9">
+        <div class="w-fit mx-auto md:mx-0 md:mt-2">
           <CTA Href="/about/mpkpo" mode="dark" />
         </div>
       </div>
@@ -213,6 +212,6 @@ import HistorySection from "../../components/HistorySection.astro";
           class="bg-secondary max-h-70 md:max-h-130 object-cover mx-auto transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
         />
       </div>
-    </div>
+    </Container>
   </Section>
 </Layout>

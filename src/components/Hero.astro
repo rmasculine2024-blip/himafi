@@ -1,8 +1,8 @@
 ---
 import Section from "./Section.astro";
+import Container from "./Container.astro";
 import H1 from "./H1.astro";
 import H2 from "./H2.astro";
-import H3 from "./H3.astro";
 import Paragraph from "./Paragraph.astro";
 import { Image } from "astro:assets";
 import SamanvayaLogo from "../assets/logo/samanvaya.png";
@@ -19,25 +19,65 @@ import fotoSpartival from "../assets/images/Spartival.jpg";
 import fotoTo from "../assets/images/Training-organization.jpg";
 import fotoPhyTon from "../assets/images/PHY-TON.jpg";
 import ProgramsCard from "../components/ProgramsCard.astro";
-import {sortNewsByDate} from "../utils/date.ts"
+import { sortNewsByDate } from "../utils/date.ts";
 import { getCollection } from "astro:content";
 const title = "HIMAFI";
 const subhead = `UIN syarif hidayatullah jakarta`;
 const news = await getCollection("news");
-const sorted = sortNewsByDate(news);
+// Homepage cuma menampilkan 3 terbaru — sisanya lewat CTA "Lihat lebih banyak"
+const latestNews = sortNewsByDate(news).slice(0, 3);
+
+const programs = [
+  {
+    title: "PBAK",
+    content: "Pengenalan Budaya Akademik",
+    img: fotoPbak,
+    href: "/about/kaderisasi#KaderisasiProgram",
+  },
+  {
+    title: "Robotik",
+    content: "Klub Robotik HIMAFI",
+    img: fotoRbtc,
+    href: "/about/litbang#LITBANGProgram",
+  },
+  {
+    title: "Ekspedisi",
+    content: "Eksplorasi Pengenalan Edukasi Fisika",
+    img: fotoEkspe,
+    href: "/about/kaderisasi#KaderisasiProgram",
+  },
+  {
+    title: "Spartival",
+    content: "Sport and Art Festival",
+    img: fotoSpartival,
+    href: "/about/minbak#MINBAKProgram",
+  },
+  {
+    title: "Training Organization",
+    content: "Pelatihan Organisasi dan Kepemimpinan",
+    img: fotoTo,
+    href: "/about/kaderisasi#KaderisasiProgram",
+  },
+  {
+    title: "Phy-ton",
+    content: "Penggalangan dana bagi anak-anak panti asuhan",
+    img: fotoPhyTon,
+    href: "/about/sosro#SOSROProgram",
+  },
+];
 ---
 
 <Section mode="light">
-  <div
-    class="mx-auto  w-full max-w-5xl px-4 sm:px-6 lg:px-0 flex flex-col items-center md:flex-row"
+  <Container
+    class="py-24 md:py-28 flex flex-col items-center gap-10 md:flex-row md:gap-12"
   >
     <div class="md:w-1/2">
       <H1 text={title} />
       <H2 text={subhead} />
       <Paragraph
-        text=`Kabinet Samanvaya hadir sebagai poros stabilitas dan sinergitas HIMAFI UIN Syarif Hidayatullah Jakarta. Kami berkomitmen penuhmewujudkan tata kelola organisasi yang integratif, akuntabel, dan profesional untuk menjalin kolaborasi strategis dengan berbagai kemitraan.`
+        text=`Kabinet Samanvaya hadir sebagai poros stabilitas dan sinergitas HIMAFI UIN Syarif Hidayatullah Jakarta. Kami berkomitmen penuh mewujudkan tata kelola organisasi yang integratif, akuntabel, dan profesional untuk menjalin kolaborasi strategis dengan berbagai kemitraan.`
       />
-      <div class="w-fit mx-auto md:ml-9">
+      <div class="w-fit mx-auto md:mx-0 md:mt-2">
         <CTA mode="bright" Href="/about#about" />
       </div>
     </div>
@@ -50,130 +90,92 @@ const sorted = sortNewsByDate(news);
         fetchpriority="high"
       />
     </div>
-  </div>
+  </Container>
 </Section>
 
 <Section mode="dark">
-  <div
-    class="w-full pt-36 lg:pt-20 px-4 sm:px-8 md:px-16 lg:px-24 flex flex-col items-center pb-20 md:pb-10"
-  >
-    <div class="flex flex-col items-center">
-      <H1 text="Berita" mode="center" />
-    </div>
+  <Container class="py-24 md:py-28 flex flex-col items-center">
+    <H1 text="Berita" mode="center" />
+
     <div
-      class="mt-10 flex px-7 md:px-10 lg:px-36 flex-wrap justify-center md:grid md:grid-cols-3 md:gap-7 sm:grid-cols-2 gap-10"
+      class="mt-12 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
     >
-      {news.map((report) => <NewsSection report={report} />)}
-      {news.length < 1 && <Paragraph text="Ga ada berita kawan " />}
+      {latestNews.map((report) => <NewsSection report={report} />)}
     </div>
+    {latestNews.length < 1 && <Paragraph text="Belum ada berita." />}
+
     <CTA text="Lihat lebih banyak" Href="/news" mode="dark" />
-  </div>
+  </Container>
 </Section>
 
 <Section direct="structure">
-  <div class="">
-    <div
-      class="px-4 sm:px-8 md:px-16 lg:px-42  flex flex-col items-center  pb-5 md:pb-0 md:flex-row-reverse md:justify-between"
-    >
-      <div class="p-6 md:w-1/2 md:flex md:flex-col">
-        <H1 text="Struktur" />
-        <Paragraph
-          text=`"Dibalik setiap program kerja yang sukses, terdapat sinergi kuat dari
-        para pengurus HIMAFI. inilah jajaran struktur organisasi yang
-        berkomitmen untuk membawa perubahan positif dan menjadi wadah aspirasi
-        bagi seluruh mahasiswa"`
-        />
-        <div class="w-fit mx-auto md:ml-9">
-          <CTA mode="bright" Href="/about#structure" />
-        </div>
-      </div>
-      <div class="flex flex-col md:flex-row md:pl-10 md:gap-10">
-        <div>
-          <div class="rounded-2xl shadow-lg overflow-hidden appear-anim">
-            <Image
-              src={fotoNeiya}
-              alt="Neiya"
-              loading="eager"
-              fetchpriority="high"
-              class="w-50 md:w-72 md:h-112 object-cover transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
-            />
-          </div>
-          <h2 class="mt-2 text-center text-lg font-bold font-subhead">
-            Ketua Himpunan
-          </h2>
-          <p class="text-center font-isi">Na’ilah Zahra Putri Utomo</p>
-        </div>
-        <div>
-          <div class="rounded-2xl shadow-lg overflow-hidden appear-anim">
-            <Image
-              src={fotoHarry}
-              alt="Harry"
-              loading="eager"
-              fetchpriority="high"
-              class="w-50 md:w-72 md:h-112 object-cover transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
-            />
-          </div>
-          <h2 class="mt-2 text-center text-lg font-bold font-subhead">
-            Wakil Ketua Himpunan
-          </h2>
-          <p class="text-center font-isi">Hary Caesar Setiawan</p>
-        </div>
+  <Container
+    class="py-24 md:py-28 flex flex-col items-center gap-10 md:flex-row-reverse md:justify-between md:gap-12"
+  >
+    <div class="md:w-1/2 flex flex-col">
+      <H1 text="Struktur" />
+      <Paragraph
+        text=`"Dibalik setiap program kerja yang sukses, terdapat sinergi kuat dari
+      para pengurus HIMAFI. inilah jajaran struktur organisasi yang
+      berkomitmen untuk membawa perubahan positif dan menjadi wadah aspirasi
+      bagi seluruh mahasiswa"`
+      />
+      <div class="w-fit mx-auto md:mx-0 md:mt-2">
+        <CTA mode="bright" Href="/about#structure" />
       </div>
     </div>
-  </div>
+    <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
+      <div>
+        <div class="rounded-2xl shadow-lg overflow-hidden appear-anim">
+          <Image
+            src={fotoNeiya}
+            alt="Neiya"
+            loading="eager"
+            fetchpriority="high"
+            class="w-50 max-w-full md:w-72 md:h-112 object-cover transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
+          />
+        </div>
+        <h2 class="mt-3 text-center text-lg font-bold font-subhead">
+          Ketua Himpunan
+        </h2>
+        <p class="text-center font-isi">Na’ilah Zahra Putri Utomo</p>
+      </div>
+      <div>
+        <div class="rounded-2xl shadow-lg overflow-hidden appear-anim">
+          <Image
+            src={fotoHarry}
+            alt="Harry"
+            loading="eager"
+            fetchpriority="high"
+            class="w-50 max-w-full md:w-72 md:h-112 object-cover transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
+          />
+        </div>
+        <h2 class="mt-3 text-center text-lg font-bold font-subhead">
+          Wakil Ketua Himpunan
+        </h2>
+        <p class="text-center font-isi">Hary Caesar Setiawan</p>
+      </div>
+    </div>
+  </Container>
 </Section>
 
 <Section mode="dark">
-  <div class="py-20 px-4 sm:px-8 md:px-16 lg:px-20">
-    <div class="">
-      <div class="hidden md:block pl-26"><H1 text="Program Kerja" /></div>
-      <div class="md:hidden"><H1 text="Proker" /></div>
-      <div class="md:px-26">
-        <Paragraph
-          text="Program kerja HIMAFI bertujuan mewujudkan aspirasi anggota HIMAFI Fakultas Sains dan Teknologi Universitas Islam Negeri Syarif Hidayatullah Jakarta dalam rangka kegiatan yang nyata dengan menjunjung tinggi persatuan dan kesatuan serta memeliharaiklim kemahasiswaan yang religius, ilmiah, sehat, dinamis, kreatif, dan independen."
-        />
-      </div>
-    </div>
+  <Container class="py-24 md:py-28">
+    <div class="hidden md:block"><H1 text="Program Kerja" /></div>
+    <div class="md:hidden"><H1 text="Proker" /></div>
+    <Paragraph
+      text="Program kerja HIMAFI bertujuan mewujudkan aspirasi anggota HIMAFI Fakultas Sains dan Teknologi Universitas Islam Negeri Syarif Hidayatullah Jakarta dalam rangka kegiatan yang nyata dengan menjunjung tinggi persatuan dan kesatuan serta memelihara iklim kemahasiswaan yang religius, ilmiah, sehat, dinamis, kreatif, dan independen."
+    />
+
     <div
-      class="mt-10 flex px-10 md:px-36 flex-wrap justify-center md:grid md:grid-cols-3 md:gap-7 sm:grid-cols-2 sm:gap-10"
+      class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch"
     >
-      <ProgramsCard
-        title="PBAK"
-        content="Pengenalan Budaya Akademik"
-        img={fotoPbak}
-        Href="/about/kaderisasi#KaderisasiProgram"
-      />
-      <ProgramsCard
-        title="Robotik"
-        content="Klub Robotik HIMAFI"
-        img={fotoRbtc}
-        Href="/about/litbang#LITBANGProgram"
-      />
-      <ProgramsCard
-        title="Ekspedisi"
-        content="Eksplorasi Pengenalan Edukasi Fisika"
-        img={fotoEkspe}
-        Href="/about/kaderisasi#KaderisasiProgram"
-      />
-      <ProgramsCard
-        title="Spartival"
-        content="Sport and Art Festival"
-        img={fotoSpartival}
-        Href="/about/minbak#MINBAKProgram"
-      />
-      <ProgramsCard
-        title="Training Organization"
-        content="Pelatihan Organisasi dan Kepemimpinan"
-        img={fotoTo}
-        Href="/about/kaderisasi#KaderisasiProgram"
-      />
-      <ProgramsCard
-        title="Phy-ton"
-        content="Penggalangan dana bagi anak-anak panti asuhan"
-        img={fotoPhyTon}
-        Href="/about/kaderisasi#SOSROProgram"
-      />
+      {
+        programs.map(({ title, content, img, href }) => (
+          <ProgramsCard title={title} content={content} img={img} Href={href} />
+        ))
+      }
     </div>
-  </div>
+  </Container>
 </Section>
 <Partner />

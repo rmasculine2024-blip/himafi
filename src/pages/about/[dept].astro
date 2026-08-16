@@ -9,19 +9,15 @@ import {
   programsImages,
 } from "../../utils/image";
 import Section from "../../components/Section.astro";
+import Container from "../../components/Container.astro";
 export async function getStaticPaths() {
   const departments = await getCollection("departments");
-  console.log("departments ditemukan:", departments.length); // kalau 0 = masalahnya di sini
-  console.log(
-    "ids:",
-    departments.map((d) => d.id),
-  );
   return departments.map((dept) => ({
     params: { dept: dept.id },
     props: { dept },
   }));
 }
-import instagramIcon from "../../assets/logo/instagram.svg?raw";
+import MemberModal from "../../components/MemberModal.astro";
 const { dept } = Astro.props;
 const programId = `${dept.data.name}Program`;
 
@@ -41,7 +37,11 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
 }));
 ---
 
-<Layout Pagetitle={dept.data.name}>
+<Layout
+  Pagetitle={dept.data.name}
+  description={dept.data.description}
+  image={(deptSecPhoto ?? deptPhoto)?.src}
+>
   <!-- Hero foto departemen -->
   {
     deptPhoto && (
@@ -54,10 +54,10 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
           fetchpriority="high"
         />
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <h1 class="font-heading font-bold text-5xl text-white">
+          <h1 class="font-heading font-bold text-5xl text-neutralwhite">
             {dept.data.name}
           </h1>
-          <p class="font-isi text-white/80 mt-2">{dept.data.fullName}</p>
+          <p class="font-isi text-neutralwhite/80 mt-2">{dept.data.fullName}</p>
         </div>
       </div>
     )
@@ -73,10 +73,10 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
           fetchpriority="high"
         />
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <h1 class="font-heading font-bold text-5xl text-white">
+          <h1 class="font-heading font-bold text-5xl text-neutralwhite">
             {dept.data.name}
           </h1>
-          <p class="font-isi text-white/80 mt-2">{dept.data.fullName}</p>
+          <p class="font-isi text-neutralwhite/80 mt-2">{dept.data.fullName}</p>
         </div>
       </div>
     )
@@ -84,16 +84,24 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
 
   <Section>
     <div class="flex flex-col w-full min-h-screen">
-      <section class="px-4 md:px-30 py-16">
-        <p class="font-isi max-w-2xl">{dept.data.description}</p>
+      <Container class="py-20 md:py-24">
+        <p class="font-isi max-w-2xl text-fluid-body leading-relaxed">
+          {dept.data.description}
+        </p>
 
-        <!-- Grid member -->
-        <h2 class="font-heading font-bold text-2xl mt-14 mb-6">Anggota</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <!-- Grid member — tampilannya sengaja sama persis dengan
+             MemberDirectory di /about supaya tidak terasa dua halaman beda -->
+        <h2
+          class="font-heading font-bold text-2xl md:text-3xl mt-14 mb-8 heading-accent heading-accent-left"
+        >
+          Anggota
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
           {
             resolvedMembers.map((member) => (
               <button
-                class="text-left group cursor-pointer"
+                type="button"
+                class="lift text-left group cursor-pointer rounded-2xl overflow-hidden bg-neutralwhite ring-1 ring-primary/10 shadow-sm hover:shadow-xl"
                 data-member={JSON.stringify({
                   name: member.name,
                   role: member.role,
@@ -104,41 +112,46 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
                   photo: member.resolvedPhoto?.src ?? "",
                 })}
               >
-                <div class="overflow-hidden rounded-xl aspect-square bg-primary-darken/10">
+                <div class="relative overflow-hidden aspect-square bg-primary/10">
                   {member.resolvedPhoto ? (
                     <Image
                       src={member.resolvedPhoto}
                       alt={member.name}
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                       loading="eager"
                       fetchpriority="high"
                     />
                   ) : (
                     <div class="w-full h-full flex items-center justify-center">
-                      <span class="font-heading text-2xl font-bold text-primary">
+                      <span class="font-heading text-3xl font-bold text-primary/40">
                         {member.name.charAt(0)}
                       </span>
                     </div>
                   )}
+                  <div class="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-primary-darken/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
-                <p class="mt-2 font-heading font-bold text-sm">{member.name}</p>
-                <p class="font-isi text-xs text-primary/60">{member.role}</p>
+                <div class="p-3">
+                  <p class="font-heading font-bold text-sm text-primary-darken leading-snug line-clamp-2">
+                    {member.name}
+                  </p>
+                  <p class="font-isi text-xs text-primary/60 mt-0.5 line-clamp-1">
+                    {member.role}
+                  </p>
+                </div>
               </button>
             ))
           }
         </div>
-
-        <!-- Section program kerja (kalau ada) -->
-      </section>
+      </Container>
 
       {
         resolvedPrograms.length > 0 && (
           <Section mode="dark" direct={programId}>
-            <div class="pt-16 px-6 md:px-16 lg:px-30 pb-16">
-              <h2 class="font-heading font-bold text-center text-2xl md:text-6xl mb-6">
+            <Container class="py-20 md:py-24">
+              <h2 class="font-heading font-bold text-center text-3xl md:text-5xl lg:text-6xl mb-12 heading-accent">
                 Agenda
               </h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {resolvedPrograms.map((program) => (
                   <button
                     class="rounded-xl border border-secondary-bright/20 overflow-hidden text-left cursor-pointer group hover:scale-[1.02] transition-transform duration-300"
@@ -177,7 +190,7 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
                   </button>
                 ))}
               </div>
-            </div>
+            </Container>
           </Section>
         )
       }
@@ -187,20 +200,20 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
   <!-- program modal -->
   <div
     id="program-modal"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center p-4 md:p-10"
+    class="fixed inset-0 bg-neutralblack/60 backdrop-blur-sm z-50 items-center justify-center p-4 md:p-10"
     style="display: none"
   >
     <div
-      class="relative bg-neutralwhite rounded-3xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-row shadow-2xl"
+      class="relative bg-neutralwhite rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
     >
       <button
         id="close-program-modal"
         class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-primary-darken/60 text-neutralwhite flex items-center justify-center hover:bg-primary-darken transition-colors text-sm font-bold cursor-pointer"
         aria-label="Tutup">✕</button
       >
-      <!-- Foto program: selalu kiri -->
+      <!-- Foto program: di atas saat mobile, kiri saat desktop -->
       <div
-        class="w-5/12 shrink-0 overflow-hidden relative bg-primary-darken/10"
+        class="w-full h-52 shrink-0 md:h-auto md:w-5/12 overflow-hidden relative bg-primary-darken/10"
       >
         <img
           id="prog-modal-photo"
@@ -219,8 +232,8 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
           ></span>
         </div>
       </div>
-      <!-- Info program: selalu kanan -->
-      <div class="w-7/12 flex flex-col overflow-y-auto">
+      <!-- Info program: di bawah saat mobile, kanan saat desktop -->
+      <div class="w-full md:w-7/12 flex flex-col overflow-y-auto">
         <div class="p-6 md:p-10 flex flex-col h-full">
           <p
             id="prog-modal-name"
@@ -249,81 +262,7 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
       </div>
     </div>
   </div>
-  <!-- Modal member -->
-  <div
-    id="member-modal"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center p-4 md:p-10"
-    style="display: none"
-  >
-    <div
-      class="relative bg-neutralwhite rounded-3xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-row shadow-2xl"
-    >
-      <button
-        id="close-modal"
-        class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-primary-darken/60 text-neutralwhite flex items-center justify-center hover:bg-primary-darken transition-colors text-sm font-bold cursor-pointer"
-        aria-label="Tutup">✕</button
-      >
-      <!-- Foto: selalu kiri -->
-      <div
-        class="w-5/12 shrink-0 overflow-hidden relative bg-primary-darken/10"
-      >
-        <img
-          id="modal-photo"
-          src=""
-          alt=""
-          class="w-full h-full object-cover object-top"
-        />
-        <div
-          id="modal-photo-fallback"
-          class="absolute inset-0 items-center justify-center bg-primary-darken/20"
-          style="display: none"
-        >
-          <span
-            id="modal-photo-initial"
-            class="font-heading text-6xl font-bold text-primary-darken/40"
-          ></span>
-        </div>
-      </div>
-      <!-- Info: selalu kanan -->
-      <div class="w-7/12 flex flex-col overflow-y-auto">
-        <div class="p-6 md:p-10 flex flex-col h-full">
-          <div>
-            <p
-              id="modal-name"
-              class="font-heading font-bold text-xl md:text-3xl text-primary-darken leading-tight"
-            >
-            </p>
-            <p
-              id="modal-role"
-              class="font-isi text-primary/60 mt-2 text-xs md:text-base"
-            >
-            </p>
-            <div class="flex gap-0 flex-col md:gap-3 md:flex-row">
-              <span
-                id="modal-angkatan"
-                class="w-fit inline-block mt-3 text-fluid-body font-isi bg-primary/10 text-primary px-3 py-1 rounded-full"
-              ></span>
-              <div
-                id="igCov"
-                class="w-fit mt-3 text-fluid-body font-isi bg-primary text-secondary px-3 py-1 rounded-full flex justify-center items-center gap-1"
-              >
-                <div class="[&>svg]:w-5 [&>svg]:h-5">
-                  <Fragment set:html={instagramIcon} alt="instagram" />
-                </div>
-                <a id="modal-instagram" target="_blank"></a>
-              </div>
-            </div>
-          </div>
-          <hr class="my-4 md:my-6 border-primary/10" />
-          <p
-            id="modal-bio"
-            class="font-isi text-fluid-body max-h-30 md:max-h-full md:text-base leading-relaxed text-primary-darken flex-1 overflow-y-scroll"
-          >
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+  <MemberModal />
 
   <script>
     // ─── Helper: typed getElementById ────────────────────────
@@ -371,46 +310,8 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
       document.body.style.overflow = "";
     }
 
-    // ─── Populate member modal ────────────────────────────────
-    function showMember(data: {
-      name: string;
-      role: string;
-      angkatan?: string;
-      instagram?: string;
-      instagramUrl?: string;
-      bio: string;
-      photo?: string;
-    }) {
-      el("modal-name")!.textContent = data.name;
-      el("modal-role")!.textContent = data.role;
-      el("modal-bio")!.textContent = data.bio;
-
-      const badge = el("modal-angkatan");
-      const igBadge = el("modal-instagram");
-      if (igBadge) {
-        igBadge.textContent = data.instagram ? ` ${data.instagram}` : "";
-        igBadge.setAttribute("href", `${data.instagramUrl}`);
-        igBadge.setAttribute("target", `_blank`);
-        igBadge.parentElement!.style.display = data.instagram
-          ? "flex "
-          : "none";
-      }
-      if (badge) {
-        badge.textContent = data.angkatan ? `Angkatan ${data.angkatan}` : "";
-        badge.style.display = data.angkatan ? "inline-block" : "none";
-      }
-      setPhoto(
-        "modal-photo",
-        "modal-photo-fallback",
-        "modal-photo-initial",
-        data.photo ?? "",
-        data.name,
-      );
-
-      openModal("member-modal");
-    }
-
     // ─── Populate program modal ───────────────────────────────
+    // Modal member ditangani sendiri oleh komponen MemberModal.astro
     function showProgram(data: {
       name: string;
       date?: string;
@@ -450,23 +351,10 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
     document.addEventListener("click", (e) => {
       const t = e.target as Element;
 
-      // Klik kartu member
-      const memberCard = t.closest<HTMLElement>("[data-member]");
-      if (memberCard?.dataset.member) {
-        showMember(JSON.parse(memberCard.dataset.member));
-        return;
-      }
-
       // Klik kartu program
       const programCard = t.closest<HTMLElement>("[data-program]");
       if (programCard?.dataset.program) {
         showProgram(JSON.parse(programCard.dataset.program));
-        return;
-      }
-
-      // Tutup member modal: tombol X atau klik backdrop
-      if (t.closest("#close-modal") || t.id === "member-modal") {
-        closeModal("member-modal");
         return;
       }
 
@@ -477,10 +365,9 @@ const resolvedPrograms = dept.data.programs.map((program) => ({
       }
     });
 
-    // Escape menutup modal yang sedang terbuka
+    // Escape menutup modal program
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
-      closeModal("member-modal");
       closeModal("program-modal");
     });
   </script>

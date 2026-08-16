@@ -31,26 +31,27 @@ const partners = [
   { src: pusatKarirUinLogo, alt: "Pusat Karir UIN Jakarta" },
   { src: pufaLogo, alt: "PUFA" },
 ];
-const doubled = [...partners, ...partners];
 ---
 
 <section
   class="bg-secondary-bright flex flex-col py-10 text-primary-darken items-center md:justify-between overflow-x-hidden"
 >
   <div>
-    <h1 class="headline-text-center text-4xl md:block font-bold">
-      Our Partner
-    </h1>
+    <h1 class="text-center text-4xl font-bold">Our Partner</h1>
   </div>
 
-  <!-- Wrapper animasi, space-x gw kecilin dikit di HP (8) dan gedein di Desktop (16) -->
-  <div class="flex space-x-8 md:space-x-16 overflow-hidden w-full mt-8">
-    <!-- UL Pertama (tambahin shrink-0) -->
+  <!--
+    Marquee: cukup 2 salinan daftar (1 asli + 1 duplikat aria-hidden).
+    Jarak antar logo pakai space-x, dan pr-* menambahkan jarak yang SAMA
+    di ujung tiap ul supaya lebar ul == jarak translateX(-100%) — kalau
+    jaraknya ditaruh di wrapper, tiap loop bakal loncat sebesar gap.
+  -->
+  <div class="flex overflow-hidden w-full mt-8">
     <ul
-      class="flex space-x-8 md:space-x-16 animate-loop-scroll shrink-0 items-center"
+      class="flex space-x-8 md:space-x-16 pr-8 md:pr-16 animate-loop-scroll shrink-0 items-center"
     >
       {
-        doubled.map(({ src, alt }) => (
+        partners.map(({ src, alt }) => (
           <li class="shrink-0">
             <Image
               src={src}
@@ -62,13 +63,12 @@ const doubled = [...partners, ...partners];
       }
     </ul>
 
-    <!-- UL Kedua (Duplikat buat looping, tambahin shrink-0 juga) -->
     <ul
-      class="flex space-x-8 md:space-x-16 animate-loop-scroll shrink-0 items-center"
+      class="flex space-x-8 md:space-x-16 pr-8 md:pr-16 animate-loop-scroll shrink-0 items-center"
       aria-hidden="true"
     >
       {
-        doubled.map(({ src, alt }) => (
+        partners.map(({ src, alt }) => (
           <li class="shrink-0">
             <Image
               src={src}

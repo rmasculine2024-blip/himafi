@@ -9,6 +9,7 @@ import { Image } from "astro:assets";
 import ContactBanner from "../assets/images/contact-banner.webp";
 import kominfoImg from "../assets/structure/Kominfo2.png";
 import Section from "../components/Section.astro";
+import Container from "../components/Container.astro";
 import ContactSection from "../components/ContactSection.astro";
 import pbak from "../assets/programs/kader-pbak.jpg";
 import whatsappIcon from "../assets/logo/whatsapp.svg?raw";
@@ -26,16 +27,15 @@ const Pagetitle = `Kontak`;
     />
   </div>
   <Section mode="dark">
-    <div class="pt-10">
+    <Container class="py-16 md:py-20">
       <ContactSection />
-    </div>
+    </Container>
   </Section>
   <Section>
-    <Section>
-      <div
-        class="w-full py-10 md:pt-42 px-4 sm:px-8 md:px-16 lg:px-56 flex flex-col gap-10 items-center md:flex-row"
-      >
-        <div class="md:w-1/2">
+    <Container
+      class="py-24 md:py-28 flex flex-col gap-10 items-center md:flex-row md:gap-12"
+    >
+      <div class="md:w-1/2">
           <H1 text="PB" spanText="AK" />
           <H2 text="Layanan Kontak Mahasiswa Baru untuk kegiatan PBAK" />
           <Paragraph
@@ -82,14 +82,13 @@ const Pagetitle = `Kontak`;
             </div>
           </div>
         </div>
-        <div class="md:w-1/2 rounded-2xl shadow-lg overflow-hidden appear-anim">
-          <Image
-            src={pbak}
-            alt="Contact Humas"
-            class="bg-secondary w-full h-full md:max-h-130 object-cover mx-auto transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
-          />
-        </div>
+      <div class="md:w-1/2 rounded-2xl shadow-lg overflow-hidden appear-anim">
+        <Image
+          src={pbak}
+          alt="Contact Humas"
+          class="bg-secondary w-full h-full md:max-h-130 object-cover mx-auto transition-all duration-500 brightness-[0.9] hover:brightness-100 hover:scale-110"
+        />
       </div>
-    </Section>
+    </Container>
   </Section>
 </Layout>

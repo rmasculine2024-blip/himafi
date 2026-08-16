@@ -31,30 +31,34 @@ const authorImg = findImage(authorImages, report.data.authorPic);
 
 ---
 
-<Layout Pagetitle={report.data.title}>
+<Layout
+  Pagetitle={report.data.title}
+  description={report.data.Description}
+  image={docImg?.src}
+>
   <div
     class="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-primary-darken"
   >
     <!-- Gambar artikel (ganti path sesuai struktur aset kamu) -->
     {docImg ? <Image src={docImg} alt={report.data.title} class="w-full h-full object-cover opacity-50" onerror="his.style.display='none'"/>
-    : <div class="w-full h-full object-cover opacity-50 bg- " /> <!-- fallback -->
+    : <div class="w-full h-full object-cover opacity-50 bg-primary-darken" /> <!-- fallback -->
   }
 
     <!-- Overlay gradient -->
     <div
-      class="absolute inset-0 bg-linear-to-t from-[#1A1A2E] via-[#1A1A2E]/40 to-transparent"
+      class="absolute inset-0 bg-linear-to-t from-primary-darken via-primary-darken/40 to-transparent"
     >
     </div>
 
     <!-- Label kategori + judul di atas gambar -->
     <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-10 max-w-4xl">
       <span
-        class="inline-block font-subhead bg-teritary text-[#1A1A2E] text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-sm mb-3"
+        class="inline-block font-subhead bg-teritary text-primary-darken text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-sm mb-3"
       >
         {report.data.produced}
       </span>
       <h1
-        class="font-heading text-white text-2xl sm:text-3xl lg:text-4xl font-black leading-tight"
+        class="font-heading text-neutralwhite text-2xl sm:text-3xl lg:text-4xl font-black leading-tight"
       >
         {report.data.title}
       </h1>
@@ -68,23 +72,23 @@ const authorImg = findImage(authorImages, report.data.authorPic);
       <article class="flex-1 min-w-0">
         <!-- Meta info penulis -->
         <div
-          class="flex items-center gap-3 mb-6 pb-6 border-b border-[#1A1A2E]/10"
+          class="flex items-center gap-3 mb-6 pb-6 border-b border-primary-darken/10"
         >
           <!-- Avatar penulis (ganti path sesuai aset) -->
           <div
-            class="w-10 h-10 rounded-full bg-[#1A1A2E]/10 overflow-hidden shrink-0"
+            class="w-10 h-10 rounded-full bg-primary-darken/10 overflow-hidden shrink-0"
           >
         {authorImg ? <Image src={authorImg} alt={report.data.author} class="w-full h-full object-cover" /> : <div class="w-full h-full object-cover" />}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-[#1A1A2E]">
+            <p class="text-sm font-semibold text-primary-darken">
               {report.data.author}
             </p>
-            <p class="text-xs text-[#1A1A2E]/50">{report.data.authorTag}</p>
+            <p class="text-xs text-primary-darken/50">{report.data.authorTag}</p>
           </div>
           <time
             datetime={report.data.date}
-            class="text-xs text-[#1A1A2E]/50 shrink-0"
+            class="text-xs text-primary-darken/50 shrink-0"
           >
             {formatDate(report.data.date)}
           </time>
@@ -92,7 +96,7 @@ const authorImg = findImage(authorImages, report.data.authorPic);
 
         <!-- Lead / deskripsi singkat -->
         <p
-          class="font-subhead text-base sm:text-lg text-[#1A1A2E]/70 leading-relaxed mb-8 italic border-l-4 border-teritary pl-4"
+          class="font-subhead text-base sm:text-lg text-primary-darken/70 leading-relaxed mb-8 italic border-l-4 border-teritary pl-4"
         >
           {report.data.Description}
         </p>
@@ -108,12 +112,12 @@ const authorImg = findImage(authorImages, report.data.authorPic);
     [&_p]:indent-8
     [&_h2+p]:indent-0
     [&_h3+p]:indent-0                 
-    prose-headings:font-['Playfair_Display'] prose-headings:text-[#1A1A2E]
+    prose-headings:font-subhead prose-headings:text-primary-darken
     prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
     prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-    prose-p:font-['Plus_Jakarta_Sans'] prose-p:text-[#3A3A4E] prose-p:text-base
-    prose-strong:text-[#1A1A2E] prose-strong:font-semibold
-    prose-blockquote:border-l-[#E8C547] prose-blockquote:text-[#1A1A2E]/60
+    prose-p:font-isi prose-p:text-neutralblack prose-p:text-base
+    prose-strong:text-primary-darken prose-strong:font-semibold
+    prose-blockquote:border-l-teritary prose-blockquote:text-primary-darken/60
     prose-img:rounded-lg prose-img:shadow-md "
         >
           <Content />
@@ -121,9 +125,9 @@ const authorImg = findImage(authorImages, report.data.authorPic);
 
         <!-- Footer artikel -->
         <div
-          class="mt-10 pt-6 border-t border-[#1A1A2E]/10 flex items-center justify-between flex-wrap gap-4"
+          class="mt-10 pt-6 border-t border-primary-darken/10 flex items-center justify-between flex-wrap gap-4"
         >
-          <div class="flex items-center gap-2 text-sm text-[#1A1A2E]/50">
+          <div class="flex items-center gap-2 text-sm text-primary-darken/50">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-4 h-4"
@@ -137,13 +141,13 @@ const authorImg = findImage(authorImages, report.data.authorPic);
                 stroke-width="2"
                 d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
             </svg>
-            Diproduksi oleh <strong class="text-[#1A1A2E]/70"
+            Diproduksi oleh <strong class="text-primary-darken/70"
               >{report.data.produced}</strong
             >
           </div>
           <a
             href=`/news`
-            class="text-sm font-semibold text-[#1A1A2E] hover:text-teritary transition-colors flex items-center gap-1"
+            class="text-sm font-semibold text-primary-darken hover:text-teritary transition-colors flex items-center gap-1"
           >
             ← Lihat semua artikel
           </a>
@@ -154,12 +158,10 @@ const authorImg = findImage(authorImages, report.data.authorPic);
       <aside class="lg:w-80 xl:w-96 shrink-0">
         <div class="sticky top-20">
           <div class="flex items-center gap-3 mb-5">
-            <h2
-              class="font-['Playfair_Display'] text-lg font-bold text-[#1A1A2E]"
-            >
+            <h2 class="font-subhead text-lg font-bold text-primary-darken">
               Artikel Lainnya
             </h2>
-            <div class="flex-1 h-px bg-[#1A1A2E]/10"></div>
+            <div class="flex-1 h-px bg-primary-darken/10"></div>
           </div>
 
           <div class="flex flex-col gap-4">
