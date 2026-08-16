@@ -1,0 +1,160 @@
+---
+// Modal detail anggota. Dipakai bareng oleh /about (MemberDirectory)
+// dan /about/[dept] — cukup render sekali per halaman, lalu semua elemen
+// ber-atribut data-member di halaman itu otomatis bisa membukanya.
+import instagramIcon from "../assets/logo/instagram.svg?raw";
+---
+
+<div
+  id="member-modal"
+  class="fixed inset-0 bg-neutralblack/60 backdrop-blur-sm z-50 items-center justify-center p-4 md:p-10"
+  style="display: none"
+>
+  <div
+    class="relative bg-neutralwhite rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
+  >
+    <button
+      id="close-modal"
+      class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-primary-darken/60 text-neutralwhite flex items-center justify-center hover:bg-primary-darken transition-colors text-sm font-bold cursor-pointer"
+      aria-label="Tutup">✕</button
+    >
+    <!-- Foto: di atas saat mobile, kiri saat desktop -->
+    <div
+      class="w-full h-52 shrink-0 md:h-auto md:w-5/12 overflow-hidden relative bg-primary-darken/10"
+    >
+      <img
+        id="modal-photo"
+        src=""
+        alt=""
+        class="w-full h-full object-cover object-top"
+      />
+      <div
+        id="modal-photo-fallback"
+        class="absolute inset-0 items-center justify-center bg-primary-darken/20"
+        style="display: none"
+      >
+        <span
+          id="modal-photo-initial"
+          class="font-heading text-6xl font-bold text-primary-darken/40"></span>
+      </div>
+    </div>
+    <!-- Info: di bawah saat mobile, kanan saat desktop -->
+    <div class="w-full md:w-7/12 flex flex-col overflow-y-auto">
+      <div class="p-6 md:p-10 flex flex-col h-full">
+        <div>
+          <p
+            id="modal-name"
+            class="font-heading font-bold text-xl md:text-3xl text-primary-darken leading-tight"
+          >
+          </p>
+          <p
+            id="modal-role"
+            class="font-isi text-primary/60 mt-2 text-xs md:text-base"
+          >
+          </p>
+          <div class="flex gap-0 flex-col md:gap-3 md:flex-row">
+            <span
+              id="modal-angkatan"
+              class="w-fit inline-block mt-3 text-fluid-body font-isi bg-primary/10 text-primary px-3 py-1 rounded-full"
+            ></span>
+            <div
+              id="igCov"
+              class="w-fit mt-3 text-fluid-body font-isi bg-primary text-secondary px-3 py-1 rounded-full flex justify-center items-center gap-1"
+            >
+              <div class="[&>svg]:w-5 [&>svg]:h-5">
+                <Fragment set:html={instagramIcon} alt="instagram" />
+              </div>
+              <a id="modal-instagram" target="_blank"></a>
+            </div>
+          </div>
+        </div>
+        <hr class="my-4 md:my-6 border-primary/10" />
+        <p
+          id="modal-bio"
+          class="font-isi text-fluid-body md:text-base leading-relaxed text-primary-darken flex-1"
+        >
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function el<T extends HTMLElement = HTMLElement>(id: string) {
+    return document.getElementById(id) as T | null;
+  }
+
+  function showMember(data: {
+    name: string;
+    role: string;
+    angkatan?: string;
+    instagram?: string;
+    instagramUrl?: string;
+    bio: string;
+    photo?: string;
+  }) {
+    el("modal-name")!.textContent = data.name;
+    el("modal-role")!.textContent = data.role;
+    el("modal-bio")!.textContent = data.bio;
+
+    const badge = el("modal-angkatan");
+    const igBadge = el("modal-instagram");
+    if (igBadge) {
+      igBadge.textContent = data.instagram ? ` ${data.instagram}` : "";
+      igBadge.setAttribute("href", `${data.instagramUrl}`);
+      igBadge.setAttribute("target", `_blank`);
+      igBadge.parentElement!.style.display = data.instagram ? "flex " : "none";
+    }
+    if (badge) {
+      badge.textContent = data.angkatan ? `Angkatan ${data.angkatan}` : "";
+      badge.style.display = data.angkatan ? "inline-block" : "none";
+    }
+
+    const photo = el<HTMLImageElement>("modal-photo");
+    const fallback = el("modal-photo-fallback");
+    const initial = el("modal-photo-initial");
+    if (photo && fallback && initial) {
+      if (data.photo) {
+        photo.src = data.photo;
+        photo.alt = data.name;
+        photo.style.display = "block";
+        fallback.style.display = "none";
+      } else {
+        photo.style.display = "none";
+        fallback.style.display = "flex";
+        initial.textContent = data.name.charAt(0);
+      }
+    }
+
+    const modal = el("member-modal");
+    if (!modal) return;
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMemberModal() {
+    const modal = el("member-modal");
+    if (!modal) return;
+    modal.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  // Event delegation di document — tidak butuh re-attach setelah View Transitions
+  document.addEventListener("click", (e) => {
+    const t = e.target as Element;
+
+    const memberCard = t.closest<HTMLElement>("[data-member]");
+    if (memberCard?.dataset.member) {
+      showMember(JSON.parse(memberCard.dataset.member));
+      return;
+    }
+
+    if (t.closest("#close-modal") || t.id === "member-modal") {
+      closeMemberModal();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMemberModal();
+  });
+</script>
