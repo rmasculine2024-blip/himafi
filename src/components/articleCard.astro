@@ -17,11 +17,11 @@ const authorImg = findImage(authorImages, report.data.authorPic);
 
 <a
   href={`/news/${report.id}`}
-  class="group flex gap-3 p-3 rounded-xl hover:bg-[#1A1A2E]/5 transition-colors duration-200"
+  class="group flex gap-3 p-3 rounded-xl hover:bg-primary-darken/5 transition-colors duration-200"
 >
   <!-- Thumbnail -->
   <div
-    class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-[#1A1A2E]/10"
+    class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-primary-darken/10"
   >
 
 {docImg ? <Image src={docImg} alt={report.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.parentElement.classList.add('flex','items-center','justify-center'); this.style.display='none'"/>
@@ -30,7 +30,7 @@ const authorImg = findImage(authorImages, report.data.authorPic);
     <!-- Fallback icon jika gambar tidak ada -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="w-6 h-6 text-[#1A1A2E]/20 hidden"
+      class="w-6 h-6 text-primary-darken/20 hidden"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -48,12 +48,12 @@ const authorImg = findImage(authorImages, report.data.authorPic);
   <div class="flex-1 min-w-0 flex flex-col justify-between">
     <div>
       <span
-        class="inline-block bg-teritary text-secondary-bright text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm mb-1"
+        class="inline-block bg-teritary text-primary-darken text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm mb-1"
       >
         {report.data.produced}
       </span>
       <h3
-        class="font-['Playfair_Display'] text-sm font-bold text-[#1A1A2E] leading-snug group-hover:text-[#1A1A2E]/70 transition-colors line-clamp-2"
+        class="font-subhead text-sm font-bold text-primary-darken leading-snug group-hover:text-primary-darken/70 transition-colors line-clamp-2"
       >
         {report.data.title}
       </h3>
@@ -61,18 +61,18 @@ const authorImg = findImage(authorImages, report.data.authorPic);
     <div class="flex items-center gap-1.5 mt-1.5">
       <!-- Avatar kecil -->
       <div
-        class="w-4 h-4 rounded-full bg-[#1A1A2E]/10 overflow-hidden shrink-0"
+        class="w-4 h-4 rounded-full bg-primary-darken/10 overflow-hidden shrink-0"
       >
     {authorImg
       ? <Image src={authorImg} alt={report.data.author} class="w-full h-full object-cover" />
-      : <div class="w-full h-full object-cover bg-gray-400" />
+      : <div class="w-full h-full object-cover bg-primary-darken/20" />
     }
       </div>
-      <span class="text-[11px] text-[#1A1A2E]/40 truncate"
+      <span class="text-[11px] text-primary-darken/40 truncate"
         >{report.data.author}</span
       >
-      <span class="text-[#1A1A2E]/20 text-[11px]">·</span>
-      <time class="text-[11px] text-[#1A1A2E]/40 shrink-0">
+      <span class="text-primary-darken/20 text-[11px]">·</span>
+      <time class="text-[11px] text-primary-darken/40 shrink-0">
         {formatDate(report.data.date)}
       </time>
     </div>
