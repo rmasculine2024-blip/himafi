@@ -1,0 +1,17 @@
+# Pengaturan build Netlify. Sebelumnya ini cuma ada di dashboard, jadi tidak
+# ada catatannya di repo dan salinan/fork harus menebak sendiri.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # package.json -> engines.node
+  NODE_VERSION = "22.12.0"
+
+# Catatan: `PUBLIC_WEB3FORMS_KEY` TIDAK ditaruh di sini karena file ini
+# ter-commit ke repo publik. Isi lewat dashboard:
+# Site settings -> Environment variables. Lihat .env.example.
+#
+# Astro membaca env `URL` yang diisi Netlify otomatis untuk menentukan
+# `site` (lihat astro.config.mjs), jadi canonical, og:image, dan sitemap
+# ikut alamat situs masing-masing tanpa perlu diubah manual.
