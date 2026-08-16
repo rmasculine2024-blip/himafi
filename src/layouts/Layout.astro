@@ -7,7 +7,14 @@ import Navbar from "../components/Navbar.astro";
 const {
   Pagetitle = "HIMAFI",
   description = "HIMAFI UIN Syarif Hidayatullah Jakarta...",
+  image = "/himafi.png",
 } = Astro.props;
+
+// og:image wajib URL absolut — kalau relatif, WhatsApp/Instagram/Twitter
+// tidak bisa mengambil gambarnya saat link di-share.
+const base = Astro.site ?? new URL(Astro.url.origin);
+const ogImage = new URL(image, base).href;
+const canonical = new URL(Astro.url.pathname, base).href;
 ---
 
 <!doctype html>
@@ -16,11 +23,18 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <meta property="og:title" content={`${Pagetitle} | HIMAFI`} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/himafi.png" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="HIMAFI UIN Jakarta" />
+    <meta property="og:locale" content="id_ID" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${Pagetitle} | HIMAFI`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="icon" type="image/png" href="/himafi.png" />
     <meta name="generator" content={Astro.generator} />
     <!-- font -->

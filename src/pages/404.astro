@@ -1,0 +1,63 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Section from "../components/Section.astro";
+import { Image } from "astro:assets";
+import logoHimafi from "../assets/logo/himafi.png";
+
+const links = [
+  { href: "/", label: "Beranda" },
+  { href: "/about", label: "Tentang" },
+  { href: "/news", label: "Berita" },
+  { href: "/contact", label: "Kontak" },
+];
+---
+
+<Layout
+  Pagetitle="Halaman tidak ditemukan"
+  description="Halaman yang kamu cari tidak ada di situs HIMAFI UIN Syarif Hidayatullah Jakarta."
+>
+  <Section mode="dark">
+    <div
+      class="w-full max-w-3xl mx-auto px-6 py-32 flex flex-col items-center text-center"
+    >
+      <Image
+        src={logoHimafi}
+        alt=""
+        loading="eager"
+        class="w-24 h-24 object-contain opacity-40 mb-8"
+      />
+
+      <p
+        class="font-heading font-black leading-none text-secondary-bright/25 text-[clamp(5rem,22vw,11rem)]"
+      >
+        404
+      </p>
+
+      <h1
+        class="font-heading font-bold text-fluid-h2 text-secondary-bright mt-2 heading-accent"
+      >
+        Halaman tidak ditemukan
+      </h1>
+
+      <p
+        class="font-isi text-fluid-body text-secondary-bright/70 mt-6 max-w-md leading-relaxed"
+      >
+        Alamatnya mungkin salah ketik, atau halamannya sudah dipindah. Coba
+        mulai dari salah satu tautan di bawah ini.
+      </p>
+
+      <nav class="mt-10 flex flex-wrap gap-3 justify-center">
+        {
+          links.map(({ href, label }) => (
+            <a
+              href={href}
+              class="lift font-isi font-semibold text-sm md:text-base px-6 py-3 rounded-full bg-secondary-bright text-primary-darken shadow-md hover:shadow-xl"
+            >
+              {label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </Section>
+</Layout>
