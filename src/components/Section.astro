@@ -4,8 +4,8 @@ const { mode = "light", direct = "" } = Astro.props;
 const baseClass = `min-h-screen w-full flex items-center justify-center`;
 const modeClass =
   mode === "dark"
-    ? "bg-primary-darken text-secondary-bright"
-    : "bg-secondary-bright text-primary";
+    ? "bg-primary-darken text-secondary-bright wash-dark"
+    : "bg-secondary-bright text-primary wash-light";
 ---
 
 <section class=`${baseClass} ${modeClass}` id=`${direct}`>

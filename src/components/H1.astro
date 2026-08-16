@@ -2,8 +2,13 @@
 const { text, spanText = "", mode = "left" } = Astro.props;
 
 const textMode = mode === "center" ? "md:text-center" : "md:text-left";
+// Batang aksen ikut perataan judul: selalu tengah di HP, ikut kiri di desktop
+const accent =
+  mode === "center" ? "heading-accent" : "heading-accent heading-accent-left";
 ---
 
-<h1 class=`font-heading text-fluid-h1 font-bold text-center ${textMode}`>
-  {text}<span class="text-green-900">{spanText}</span>
+<h1
+  class=`font-heading text-fluid-h1 font-bold text-center ${textMode} ${accent}`
+>
+  {text}<span class="text-green-samanvaya">{spanText}</span>
 </h1>

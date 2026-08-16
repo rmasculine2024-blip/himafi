@@ -1,0 +1,16 @@
+---
+// Bingkai lebar konten. Satu-satunya sumber kebenaran untuk tepi kiri/kanan
+// halaman — supaya semua section berbaris di garis yang sama, bukan tiap
+// section punya padding sendiri (lg:px-24, lg:px-42, lg:px-72, dst).
+interface Props {
+  width?: "page" | "prose";
+  class?: string;
+}
+
+const { width = "page", class: className = "" } = Astro.props;
+const max = width === "prose" ? "max-w-3xl" : "max-w-7xl";
+---
+
+<div class={`mx-auto w-full ${max} px-6 lg:px-8 ${className}`}>
+  <slot />
+</div>
