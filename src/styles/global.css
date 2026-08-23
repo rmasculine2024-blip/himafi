@@ -27,6 +27,15 @@
   --animate-loop-scroll: loop-scroll 50s linear infinite;
 }
 
+/* Tanpa ini, browser/OS yang pakai dark mode mewarnai kanvas halaman jadi
+   hitam di bagian mana pun yang belum diberi background eksplisit (mis.
+   detail Riset/Proyek/Phypath) — teks gelap (primary-darken, neutralblack)
+   jadi nyaris tak terbaca di atas hitam. Situs ini didesain light-only. */
+body {
+  color-scheme: light;
+  @apply bg-neutralwhite text-neutralblack;
+}
+
 .navbar {
   @apply fixed top-6 w-full flex justify-center z-50;
 }
