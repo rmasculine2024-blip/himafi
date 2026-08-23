@@ -117,6 +117,17 @@ const proyek = defineCollection({
       .optional(),
     tipeArtefak: z.enum(TIPE_ARTEFAK_PROYEK).default("tidak-ada"),
     artefakUrl: z.string().optional(),
+    // Untuk part-cad dengan lebih dari satu file STL (rakitan multi-part,
+    // mis. body/coxa/femur/tibia robot spider) — kalau diisi, ArtifactViewer
+    // nampilin selector part dan artefakUrl diabaikan.
+    artefakParts: z
+      .array(
+        z.object({
+          label: z.string(),
+          url: z.string(),
+        }),
+      )
+      .optional(),
   }),
 });
 

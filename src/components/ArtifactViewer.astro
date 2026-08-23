@@ -13,6 +13,11 @@ interface MetaItem {
   value: string;
 }
 
+interface ArtefakPart {
+  label: string;
+  url: string;
+}
+
 interface Props {
   id: string;
   title: string;
@@ -22,10 +27,13 @@ interface Props {
   downloadUrl?: string;
   citation?: string;
   dataUrl?: string;
+  parts?: ArtefakPart[];
 }
 
-const { id, title, subtitle, tipeArtefak, metadata, downloadUrl, citation, dataUrl } = Astro.props;
+const { id, title, subtitle, tipeArtefak, metadata, downloadUrl, citation, dataUrl, parts } = Astro.props;
 const dialogId = `artifact-dialog-${id}`;
+const punyaParts = Boolean(parts && parts.length > 0);
+const urlAwal = punyaParts ? parts![0].url : dataUrl;
 
 type ViewerKind = "kristal" | "3d" | "image" | "geo-vector" | "geo-raster" | "none";
 
@@ -47,7 +55,7 @@ function kindFor(tipe: string): ViewerKind {
   }
 }
 
-const viewerKind = Boolean(dataUrl) ? kindFor(tipeArtefak) : "none";
+const viewerKind = Boolean(urlAwal) ? kindFor(tipeArtefak) : "none";
 const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
 ---
 
@@ -78,7 +86,7 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
     id={dialogId}
     class="artifact-dialog w-full max-w-2xl rounded-lg p-0 backdrop:bg-black/50"
     data-viewer-kind={viewerKind}
-    data-url={dataUrl}
+    data-url={urlAwal}
   >
     <div class="flex items-center justify-between border-b border-primary/20 p-4">
       <h2 class="font-heading font-bold text-primary-darken">{title}</h2>
@@ -124,6 +132,24 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
           <span class="text-sm text-primary/70">Memuat viewer&hellip;</span>
         </div>
       </div>
+
+      {
+        punyaParts && (
+          <div data-part-switcher class="mt-3 flex flex-wrap gap-2">
+            {parts!.map((part, i) => (
+              <button
+                type="button"
+                data-part-url={part.url}
+                aria-pressed={i === 0 ? "true" : "false"}
+                data-active={i === 0 ? "true" : "false"}
+                class="rounded-full border border-primary px-3 py-1 text-xs text-primary-darken data-[active=true]:bg-primary data-[active=true]:text-secondary-bright"
+              >
+                {part.label}
+              </button>
+            ))}
+          </div>
+        )
+      }
 
       <dl class="mt-4 grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
         {
@@ -262,20 +288,36 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
     light.position.set(1, 1, 1);
     scene.add(light);
 
-    const geometry = await new STLLoader().loadAsync(url);
-    geometry.center();
-    geometry.computeBoundingSphere();
-    const material = new THREE.MeshStandardMaterial({ color: 0x560b18 });
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
-
-    const radius = geometry.boundingSphere?.radius || 50;
-    camera.position.set(radius * 2, radius * 1.6, radius * 2);
-    camera.lookAt(0, 0, 0);
-
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.autoRotate = true;
+
+    const loader = new STLLoader();
+    let currentMesh: any = null;
+
+    async function loadModel(partUrl: string) {
+      const geometry = await loader.loadAsync(partUrl);
+      geometry.center();
+      geometry.computeBoundingSphere();
+
+      if (currentMesh) {
+        scene.remove(currentMesh);
+        currentMesh.geometry.dispose();
+        currentMesh.material.dispose();
+      }
+
+      const material = new THREE.MeshStandardMaterial({ color: 0x560b18 });
+      currentMesh = new THREE.Mesh(geometry, material);
+      scene.add(currentMesh);
+
+      const radius = geometry.boundingSphere?.radius || 50;
+      camera.position.set(radius * 2, radius * 1.6, radius * 2);
+      controls.target.set(0, 0, 0);
+      camera.lookAt(0, 0, 0);
+      controls.update();
+    }
+
+    await loadModel(url);
 
     let raf = 0;
     function animate() {
@@ -298,6 +340,7 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
         controls.autoRotate = !controls.autoRotate;
         return controls.autoRotate;
       },
+      loadModel,
       dispose: () => cancelAnimationFrame(raf),
     };
   }
@@ -430,6 +473,26 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
       const spinning = target?._viewerControl?.toggleSpin?.();
       if (spinning === undefined) return;
       spinBtn.textContent = spinning ? "⏸ Stop putar" : "▶ Putar";
+    });
+
+    const partButtons = shell.querySelectorAll<HTMLButtonElement>("[data-part-url]");
+    partButtons.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!target?._viewerControl?.loadModel || btn.dataset.active === "true") return;
+        partButtons.forEach((b) => {
+          b.dataset.active = "false";
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.dataset.active = "true";
+        btn.setAttribute("aria-pressed", "true");
+        skeleton?.removeAttribute("hidden");
+        try {
+          await target._viewerControl.loadModel(btn.dataset.partUrl);
+        } catch (err) {
+          console.error(err);
+        }
+        skeleton?.setAttribute("hidden", "");
+      });
     });
 
     citationBtn?.addEventListener("click", async () => {

@@ -1,0 +1,48 @@
+---
+nama: "Spider Robot Quadruped (SG90)"
+levelBadge: "Frontier"
+tahun: 2026
+status: "selesai"
+deskripsi: "Robot berkaki empat (quadruped) yang dirakit Klub Robotik & Embedded HIMAFI menggunakan 12 servo micro SG90 (3 per kaki: coxa, femur, tibia) dan rangka hasil 3D print. Dipakai untuk belajar kinematika kaki jamak dan kontrol servo multi-channel."
+repoUrl: "https://www.thingiverse.com/thing:1009659"
+bom:
+  - nama: "Servo micro SG90"
+    jumlah: 12
+    catatan: "3 per kaki x 4 kaki (coxa, femur, tibia)"
+  - nama: "Mikrokontroler (mis. Arduino Nano/Uno)"
+    jumlah: 1
+  - nama: "Driver servo (mis. PCA9685)"
+    jumlah: 1
+    catatan: "opsional, tergantung jumlah pin PWM yang tersedia"
+  - nama: "Part rangka hasil 3D print"
+    jumlah: 1
+    catatan: "body atas/bawah, coxa kanan/kiri, femur, tibia kanan/kiri, dudukan servo"
+tipeArtefak: "part-cad"
+artefakParts:
+  - label: "Badan Atas"
+    url: "/data/proyek/spider-robot/body_u.stl"
+  - label: "Badan Bawah"
+    url: "/data/proyek/spider-robot/body_d.stl"
+  - label: "Coxa Kanan"
+    url: "/data/proyek/spider-robot/coxa_r.stl"
+  - label: "Coxa Kiri"
+    url: "/data/proyek/spider-robot/coxa_l.stl"
+  - label: "Femur"
+    url: "/data/proyek/spider-robot/femur_1.stl"
+  - label: "Tibia Kanan"
+    url: "/data/proyek/spider-robot/tibia_r.stl"
+  - label: "Tibia Kiri"
+    url: "/data/proyek/spider-robot/tibia_l.stl"
+  - label: "Dudukan Servo"
+    url: "/data/proyek/spider-robot/s_hold.stl"
+---
+
+## Sumber desain & lisensi
+
+Rangka 3D-print robot ini **bukan desain orisinal HIMAFI** — berbasis desain terbuka *"Spider robot (quad robot, quadruped)-SG90"* oleh [regishsu di Thingiverse](https://www.thingiverse.com/thing:1009659), dirilis di bawah lisensi **GNU GPL**. Klub Robotik & Embedded HIMAFI mencetak dan merakit sendiri partnya, lalu mengembangkan program kontrolnya.
+
+Panduan build & remote control asli dari desainer:
+- [DIY Spider Robot / Quad robot (Quadruped)](http://www.instructables.com/id/DIY-Spider-RobotQuad-robot-Quadruped/)
+- [DIY Spider Robot — PART II: Remote control](http://www.instructables.com/id/DIY-Spider-Robot-PART-II-Remote-control/)
+
+Tujuh part di viewer di atas bisa dipilih satu-satu (Badan Atas, Badan Bawah, Coxa, Femur, Tibia, Dudukan Servo) — masing-masing kaki pakai kombinasi coxa/femur/tibia yang sama, dicetak ulang 4x (kanan-kiri cermin untuk coxa & tibia).
