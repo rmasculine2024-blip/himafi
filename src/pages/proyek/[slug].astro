@@ -34,6 +34,21 @@ const citation = `Tim ${p.nama} (${p.tahun}). ${p.nama}. Klub Robotik & Embedded
     <p class="mt-1 text-sm text-primary/70 capitalize">{p.status}</p>
 
     {
+      p.galeri && p.galeri.length > 0 && (
+        <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {p.galeri.map((foto) => (
+            <figure class="overflow-hidden rounded-lg border border-primary/20">
+              <img src={foto.url} alt={foto.keterangan ?? p.nama} class="aspect-video w-full object-cover" loading="lazy" />
+              {foto.keterangan && (
+                <figcaption class="bg-secondary-bright px-3 py-1.5 text-xs text-neutralblack/70">{foto.keterangan}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      )
+    }
+
+    {
       p.tipeArtefak !== "tidak-ada" && (
         <div class="mt-6">
           <ArtifactViewer
@@ -46,6 +61,7 @@ const citation = `Tim ${p.nama} (${p.tahun}). ${p.nama}. Klub Robotik & Embedded
             citation={citation}
             dataUrl={p.artefakUrl}
             parts={p.artefakParts}
+            rakitan={p.artefakRakitan}
           />
         </div>
       )

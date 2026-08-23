@@ -128,6 +128,28 @@ const proyek = defineCollection({
         }),
       )
       .optional(),
+    // Posisi/rotasi manual per part untuk mode "rakitan lengkap" di viewer
+    // part-cad multi-part — perkiraan/ilustratif (bukan hasil kinematika CAD
+    // presisi), dipakai bareng dengan artefakParts di atas.
+    artefakRakitan: z
+      .array(
+        z.object({
+          url: z.string(),
+          posisi: z.tuple([z.number(), z.number(), z.number()]),
+          rotasiDeg: z.tuple([z.number(), z.number(), z.number()]).optional(),
+        }),
+      )
+      .optional(),
+    // Galeri foto (mis. foto robot fisik yang sudah dirakit) — ditampilkan
+    // di atas artifact viewer pada halaman detail proyek.
+    galeri: z
+      .array(
+        z.object({
+          url: z.string(),
+          keterangan: z.string().optional(),
+        }),
+      )
+      .optional(),
   }),
 });
 

@@ -35,6 +35,54 @@ artefakParts:
     url: "/data/proyek/spider-robot/tibia_l.stl"
   - label: "Dudukan Servo"
     url: "/data/proyek/spider-robot/s_hold.stl"
+artefakRakitan:
+  - url: "/data/proyek/spider-robot/body_d.stl"
+    posisi: [0, 0, -7.5]
+  - url: "/data/proyek/spider-robot/body_u.stl"
+    posisi: [0, 0, 5]
+  - url: "/data/proyek/spider-robot/coxa_r.stl"
+    posisi: [42.4, -42.4, 0]
+    rotasiDeg: [0, 0, -135]
+  - url: "/data/proyek/spider-robot/femur_1.stl"
+    posisi: [74.2, -74.2, -10]
+    rotasiDeg: [0, 0, -135]
+  - url: "/data/proyek/spider-robot/tibia_r.stl"
+    posisi: [99.0, -99.0, -55]
+    rotasiDeg: [35, 0, -45]
+  - url: "/data/proyek/spider-robot/coxa_l.stl"
+    posisi: [42.4, 42.4, 0]
+    rotasiDeg: [0, 0, -45]
+  - url: "/data/proyek/spider-robot/femur_1.stl"
+    posisi: [74.2, 74.2, -10]
+    rotasiDeg: [0, 0, -45]
+  - url: "/data/proyek/spider-robot/tibia_l.stl"
+    posisi: [99.0, 99.0, -55]
+    rotasiDeg: [35, 0, 45]
+  - url: "/data/proyek/spider-robot/coxa_r.stl"
+    posisi: [-42.4, -42.4, 0]
+    rotasiDeg: [0, 0, -225]
+  - url: "/data/proyek/spider-robot/femur_1.stl"
+    posisi: [-74.2, -74.2, -10]
+    rotasiDeg: [0, 0, -225]
+  - url: "/data/proyek/spider-robot/tibia_r.stl"
+    posisi: [-99.0, -99.0, -55]
+    rotasiDeg: [35, 0, -135]
+  - url: "/data/proyek/spider-robot/coxa_l.stl"
+    posisi: [-42.4, 42.4, 0]
+    rotasiDeg: [0, 0, 45]
+  - url: "/data/proyek/spider-robot/femur_1.stl"
+    posisi: [-74.2, 74.2, -10]
+    rotasiDeg: [0, 0, 45]
+  - url: "/data/proyek/spider-robot/tibia_l.stl"
+    posisi: [-99.0, 99.0, -55]
+    rotasiDeg: [35, 0, 135]
+galeri:
+  - url: "/data/proyek/spider-robot/foto/tampak-depan.jpg"
+    keterangan: "Tampak depan robot yang sudah dirakit fisik"
+  - url: "/data/proyek/spider-robot/foto/tampak-atas.jpg"
+    keterangan: "Tampak atas — 4 kaki dan elektronik kontrol"
+  - url: "/data/proyek/spider-robot/foto/render-cad.png"
+    keterangan: "Render assembly asli (SketchUp) — acuan posisi kaki di mode Rakitan lengkap"
 ---
 
 ## Sumber desain & lisensi
@@ -45,4 +93,4 @@ Panduan build & remote control asli dari desainer:
 - [DIY Spider Robot / Quad robot (Quadruped)](http://www.instructables.com/id/DIY-Spider-RobotQuad-robot-Quadruped/)
 - [DIY Spider Robot — PART II: Remote control](http://www.instructables.com/id/DIY-Spider-Robot-PART-II-Remote-control/)
 
-Tujuh part di viewer di atas bisa dipilih satu-satu (Badan Atas, Badan Bawah, Coxa, Femur, Tibia, Dudukan Servo) — masing-masing kaki pakai kombinasi coxa/femur/tibia yang sama, dicetak ulang 4x (kanan-kiri cermin untuk coxa & tibia).
+Foto di atas adalah wujud fisik robot yang sudah dirakit. Delapan part di viewer 3D bisa dipilih satu-satu (Badan Atas, Badan Bawah, Coxa, Femur, Tibia, Dudukan Servo) — masing-masing kaki pakai kombinasi coxa/femur/tibia yang sama, dicetak ulang 4x (kanan-kiri cermin untuk coxa & tibia). Tombol **"Rakitan lengkap"** nampilin ke-14 part sekaligus dalam posisi perkiraan menyerupai robot utuh — posisinya diestimasi manual dari foto & render assembly di atas, bukan hasil kinematika CAD presisi (file assembly aslinya `.skp` SketchUp, tidak otomatis terbaca dari STL).

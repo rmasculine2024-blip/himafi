@@ -18,6 +18,12 @@ interface ArtefakPart {
   url: string;
 }
 
+interface ArtefakRakitanItem {
+  url: string;
+  posisi: [number, number, number];
+  rotasiDeg?: [number, number, number];
+}
+
 interface Props {
   id: string;
   title: string;
@@ -28,11 +34,13 @@ interface Props {
   citation?: string;
   dataUrl?: string;
   parts?: ArtefakPart[];
+  rakitan?: ArtefakRakitanItem[];
 }
 
-const { id, title, subtitle, tipeArtefak, metadata, downloadUrl, citation, dataUrl, parts } = Astro.props;
+const { id, title, subtitle, tipeArtefak, metadata, downloadUrl, citation, dataUrl, parts, rakitan } = Astro.props;
 const dialogId = `artifact-dialog-${id}`;
 const punyaParts = Boolean(parts && parts.length > 0);
+const punyaRakitan = Boolean(rakitan && rakitan.length > 0);
 const urlAwal = punyaParts ? parts![0].url : dataUrl;
 
 type ViewerKind = "kristal" | "3d" | "image" | "geo-vector" | "geo-raster" | "none";
@@ -87,6 +95,7 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
     class="artifact-dialog w-full max-w-2xl rounded-lg p-0 backdrop:bg-black/50"
     data-viewer-kind={viewerKind}
     data-url={urlAwal}
+    data-rakitan={punyaRakitan ? JSON.stringify(rakitan) : undefined}
   >
     <div class="flex items-center justify-between border-b border-primary/20 p-4">
       <h2 class="font-heading font-bold text-primary-darken">{title}</h2>
@@ -136,6 +145,17 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
       {
         punyaParts && (
           <div data-part-switcher class="mt-3 flex flex-wrap gap-2">
+            {punyaRakitan && (
+              <button
+                type="button"
+                data-action="show-rakitan"
+                aria-pressed="false"
+                data-active="false"
+                class="rounded-full border border-teritary bg-teritary/20 px-3 py-1 text-xs font-semibold text-primary-darken data-[active=true]:bg-primary data-[active=true]:text-secondary-bright"
+              >
+                &#129517; Rakitan lengkap
+              </button>
+            )}
             {parts!.map((part, i) => (
               <button
                 type="button"
@@ -148,6 +168,13 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
               </button>
             ))}
           </div>
+        )
+      }
+      {
+        punyaRakitan && (
+          <p class="mt-2 text-xs text-neutralblack/50">
+            Posisi tiap part di mode "Rakitan lengkap" adalah perkiraan/ilustratif, bukan hasil kinematika CAD presisi (file assembly aslinya format SketchUp, tidak otomatis terbaca).
+          </p>
         )
       }
 
@@ -293,28 +320,70 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
     controls.autoRotate = true;
 
     const loader = new STLLoader();
-    let currentMesh: any = null;
+    const geometryCache = new Map<string, any>();
+    let currentMeshes: any[] = [];
 
-    async function loadModel(partUrl: string) {
+    function clearMeshes() {
+      for (const mesh of currentMeshes) scene.remove(mesh);
+      currentMeshes = [];
+    }
+
+    async function loadGeometry(partUrl: string) {
+      if (geometryCache.has(partUrl)) return geometryCache.get(partUrl);
       const geometry = await loader.loadAsync(partUrl);
       geometry.center();
-      geometry.computeBoundingSphere();
+      geometryCache.set(partUrl, geometry);
+      return geometry;
+    }
 
-      if (currentMesh) {
-        scene.remove(currentMesh);
-        currentMesh.geometry.dispose();
-        currentMesh.material.dispose();
-      }
-
-      const material = new THREE.MeshStandardMaterial({ color: 0x560b18 });
-      currentMesh = new THREE.Mesh(geometry, material);
-      scene.add(currentMesh);
-
-      const radius = geometry.boundingSphere?.radius || 50;
-      camera.position.set(radius * 2, radius * 1.6, radius * 2);
-      controls.target.set(0, 0, 0);
-      camera.lookAt(0, 0, 0);
+    function frameCamera(box: any) {
+      const sphere = new THREE.Sphere();
+      box.getBoundingSphere(sphere);
+      const center = sphere.center;
+      const radius = sphere.radius || 50;
+      camera.position.set(center.x + radius * 2, center.y + radius * 1.6, center.z + radius * 2);
+      controls.target.copy(center);
+      camera.lookAt(center);
       controls.update();
+    }
+
+    async function loadModel(partUrl: string) {
+      const geometry = await loadGeometry(partUrl);
+      clearMeshes();
+      const material = new THREE.MeshStandardMaterial({ color: 0x560b18 });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+      currentMeshes = [mesh];
+      geometry.computeBoundingBox();
+      frameCamera(geometry.boundingBox);
+    }
+
+    async function loadAssembly(items: { url: string; posisi: [number, number, number]; rotasiDeg?: [number, number, number] }[]) {
+      const geometries = await Promise.all(items.map((item) => loadGeometry(item.url)));
+      clearMeshes();
+      const group = new THREE.Box3();
+      let first = true;
+      geometries.forEach((geometry, i) => {
+        const item = items[i];
+        const material = new THREE.MeshStandardMaterial({ color: 0x560b18 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(...item.posisi);
+        if (item.rotasiDeg) {
+          const [rx, ry, rz] = item.rotasiDeg;
+          mesh.rotation.set((rx * Math.PI) / 180, (ry * Math.PI) / 180, (rz * Math.PI) / 180);
+        }
+        scene.add(mesh);
+        currentMeshes.push(mesh);
+        mesh.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(mesh);
+        if (first) {
+          group.copy(box);
+          first = false;
+        } else {
+          group.union(box);
+        }
+      });
+      frameCamera(group);
     }
 
     await loadModel(url);
@@ -341,6 +410,7 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
         return controls.autoRotate;
       },
       loadModel,
+      loadAssembly,
       dispose: () => cancelAnimationFrame(raf),
     };
   }
@@ -476,15 +546,21 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
     });
 
     const partButtons = shell.querySelectorAll<HTMLButtonElement>("[data-part-url]");
+    const rakitanBtn = shell.querySelector<HTMLButtonElement>('[data-action="show-rakitan"]');
+    const allSwitcherButtons = [...partButtons, ...(rakitanBtn ? [rakitanBtn] : [])];
+
+    function setActiveButton(active: HTMLButtonElement) {
+      allSwitcherButtons.forEach((b) => {
+        const isActive = b === active;
+        b.dataset.active = String(isActive);
+        b.setAttribute("aria-pressed", String(isActive));
+      });
+    }
+
     partButtons.forEach((btn) => {
       btn.addEventListener("click", async () => {
         if (!target?._viewerControl?.loadModel || btn.dataset.active === "true") return;
-        partButtons.forEach((b) => {
-          b.dataset.active = "false";
-          b.setAttribute("aria-pressed", "false");
-        });
-        btn.dataset.active = "true";
-        btn.setAttribute("aria-pressed", "true");
+        setActiveButton(btn);
         skeleton?.removeAttribute("hidden");
         try {
           await target._viewerControl.loadModel(btn.dataset.partUrl);
@@ -493,6 +569,19 @@ const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
         }
         skeleton?.setAttribute("hidden", "");
       });
+    });
+
+    rakitanBtn?.addEventListener("click", async () => {
+      if (!target?._viewerControl?.loadAssembly || rakitanBtn.dataset.active === "true") return;
+      setActiveButton(rakitanBtn);
+      skeleton?.removeAttribute("hidden");
+      try {
+        const items = JSON.parse(dialog.dataset.rakitan ?? "[]");
+        await target._viewerControl.loadAssembly(items);
+      } catch (err) {
+        console.error(err);
+      }
+      skeleton?.setAttribute("hidden", "");
     });
 
     citationBtn?.addEventListener("click", async () => {
