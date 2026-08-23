@@ -1,0 +1,43 @@
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <rect x="0" y="0" width="600" height="320" fill="#ffffff" />
+
+  <!-- Mikrokontroler -->
+  <rect x="60" y="100" width="160" height="120" rx="6" fill="#fdf8cf" stroke="#560b18" stroke-width="2" />
+  <text x="140" y="165" text-anchor="middle" font-size="16" font-weight="bold" fill="#3b010b">Arduino</text>
+  <text x="140" y="185" text-anchor="middle" font-size="12" fill="#3b010b">(Mikrokontroler)</text>
+
+  <!-- Pin keluar dari Arduino -->
+  <circle cx="220" cy="130" r="4" fill="#3b010b" />
+  <text x="230" y="134" font-size="12" fill="#3b010b">5V</text>
+  <circle cx="220" cy="160" r="4" fill="#3b010b" />
+  <text x="230" y="164" font-size="12" fill="#3b010b">GND</text>
+  <circle cx="220" cy="190" r="4" fill="#3b010b" />
+  <text x="230" y="194" font-size="12" fill="#3b010b">D9 (PWM)</text>
+
+  <!-- Kabel ke servo -->
+  <line x1="224" y1="130" x2="400" y2="120" stroke="#e11d48" stroke-width="2" />
+  <line x1="224" y1="160" x2="400" y2="160" stroke="#1f2937" stroke-width="2" />
+  <line x1="290" y1="190" x2="400" y2="200" stroke="#f0b148" stroke-width="2" />
+
+  <!-- Servo motor -->
+  <rect x="400" y="100" width="140" height="120" rx="6" fill="#fdf8cf" stroke="#560b18" stroke-width="2" />
+  <text x="470" y="165" text-anchor="middle" font-size="16" font-weight="bold" fill="#3b010b">Servo</text>
+  <text x="470" y="185" text-anchor="middle" font-size="12" fill="#3b010b">MG996R</text>
+
+  <!-- Pin servo -->
+  <circle cx="400" cy="120" r="4" fill="#e11d48" />
+  <circle cx="400" cy="160" r="4" fill="#1f2937" />
+  <circle cx="400" cy="200" r="4" fill="#f0b148" />
+
+  <!-- Legenda -->
+  <g transform="translate(60,260)">
+    <line x1="0" y1="0" x2="24" y2="0" stroke="#e11d48" stroke-width="2" />
+    <text x="30" y="4" font-size="12" fill="#181717">VCC (merah)</text>
+    <line x1="150" y1="0" x2="174" y2="0" stroke="#1f2937" stroke-width="2" />
+    <text x="180" y="4" font-size="12" fill="#181717">GND (hitam)</text>
+    <line x1="300" y1="0" x2="324" y2="0" stroke="#f0b148" stroke-width="2" />
+    <text x="330" y="4" font-size="12" fill="#181717">Sinyal PWM (kuning)</text>
+  </g>
+
+  <text x="300" y="300" text-anchor="middle" font-size="11" fill="#6b7280">Skematik ilustratif — sederhanakan sesuai wiring asli sebelum dipakai di lapangan.</text>
+</svg>

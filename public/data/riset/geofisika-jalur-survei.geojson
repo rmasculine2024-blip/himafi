@@ -1,0 +1,35 @@
+{
+  "type": "FeatureCollection",
+  "name": "jalur-survei-geolistrik-demo",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "nama": "Lintasan Survei Geolistrik (Demo)", "panjang_m": 100 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [106.7515, -6.3080],
+          [106.7522, -6.3078],
+          [106.7529, -6.3076],
+          [106.7536, -6.3074],
+          [106.7543, -6.3072]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "nama": "Elektroda 1", "titik": 1 },
+      "geometry": { "type": "Point", "coordinates": [106.7515, -6.3080] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "nama": "Elektroda 2", "titik": 2 },
+      "geometry": { "type": "Point", "coordinates": [106.7529, -6.3076] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "nama": "Elektroda 3", "titik": 3 },
+      "geometry": { "type": "Point", "coordinates": [106.7543, -6.3072] }
+    }
+  ]
+}

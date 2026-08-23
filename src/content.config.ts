@@ -116,6 +116,7 @@ const proyek = defineCollection({
       )
       .optional(),
     tipeArtefak: z.enum(TIPE_ARTEFAK_PROYEK).default("tidak-ada"),
+    artefakUrl: z.string().optional(),
   }),
 });
 

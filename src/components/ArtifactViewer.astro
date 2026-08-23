@@ -1,9 +1,13 @@
 ---
 // Shell viewer artefak riset/proyek — satu struktur dipakai lintas semua
-// tipeArtefak (kristal, plot geofisika, part robot, skematik/PCB): preview
-// card -> tap expand -> skeleton -> viewer -> metadata -> action bar.
-// Viewer kristal 3D (3Dmol.js) sudah diimplementasi nyata; tipe lain masih
-// placeholder sampai ada library yang cocok (model-viewer/Plotly/dst).
+// tipeArtefak: preview card -> tap expand -> skeleton -> viewer -> metadata
+// -> action bar. Viewer nyata per tipeArtefak (semua lazy-load library dari
+// CDN saat dialog pertama dibuka, tidak dibundel ke app):
+//   - kristal              -> 3Dmol.js (struktur molekul/kristal dari CIF)
+//   - part-cad             -> three.js + STLLoader (model 3D case/part)
+//   - skematik, pcb        -> gambar statis (SVG/PNG hasil export)
+//   - geofisika-profil     -> Leaflet, data vektor (GeoJSON/KML/Shapefile-zip)
+//   - geofisika-mesh       -> Leaflet + georaster (raster GeoTIFF)
 interface MetaItem {
   label: string;
   value: string;
@@ -22,8 +26,41 @@ interface Props {
 
 const { id, title, subtitle, tipeArtefak, metadata, downloadUrl, citation, dataUrl } = Astro.props;
 const dialogId = `artifact-dialog-${id}`;
-const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
+
+type ViewerKind = "kristal" | "3d" | "image" | "geo-vector" | "geo-raster" | "none";
+
+function kindFor(tipe: string): ViewerKind {
+  switch (tipe) {
+    case "kristal":
+      return "kristal";
+    case "part-cad":
+      return "3d";
+    case "skematik":
+    case "pcb":
+      return "image";
+    case "geofisika-profil":
+      return "geo-vector";
+    case "geofisika-mesh":
+      return "geo-raster";
+    default:
+      return "none";
+  }
+}
+
+const viewerKind = Boolean(dataUrl) ? kindFor(tipeArtefak) : "none";
+const punyaSpinToggle = viewerKind === "kristal" || viewerKind === "3d";
 ---
+
+{
+  viewerKind === "3d" && (
+    <script type="importmap" is:inline set:html={JSON.stringify({
+      imports: {
+        three: "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      },
+    })} />
+  )
+}
 
 <div class="artifact-shell" data-artifact-id={id}>
   <button
@@ -40,7 +77,7 @@ const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
   <dialog
     id={dialogId}
     class="artifact-dialog w-full max-w-2xl rounded-lg p-0 backdrop:bg-black/50"
-    data-tipe-artefak={tipeArtefak}
+    data-viewer-kind={viewerKind}
     data-url={dataUrl}
   >
     <div class="flex items-center justify-between border-b border-primary/20 p-4">
@@ -51,28 +88,41 @@ const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
     </div>
 
     <div class="p-4">
-      <div data-skeleton class="flex aspect-video w-full animate-pulse items-center justify-center rounded-lg bg-secondary">
-        <span class="text-sm text-primary/70">Memuat viewer&hellip;</span>
-      </div>
-      <div data-viewer hidden class="relative aspect-video w-full overflow-hidden rounded-lg border border-dashed border-primary/30 bg-secondary-bright">
+      <div class="relative aspect-video w-full overflow-hidden rounded-lg border border-dashed border-primary/30 bg-secondary-bright">
         {
-          punyaViewerKristal ? (
-            <>
-              <div data-viewer-canvas class="h-full w-full" />
-              <button
-                type="button"
-                data-action="toggle-spin"
-                class="absolute right-2 top-2 rounded-full border border-primary bg-secondary-bright px-2 py-1 text-xs text-primary-darken"
-              >
-                &#9208; Stop putar
-              </button>
-            </>
-          ) : (
-            <span class="flex h-full items-center justify-center px-4 text-center text-sm text-neutralblack/60">
-              Viewer tipe <strong>{tipeArtefak}</strong> — segera hadir (model-viewer / Plotly / InteractiveHtmlBom)
-            </span>
-          )
+          /* data-viewer TIDAK PERNAH di-hidden/display:none — canvas WebGL
+             (three.js) dan peta (Leaflet) butuh layout/ukuran nyata sejak
+             dibuat, atau render pertamanya rusak permanen walau di-resize
+             belakangan. Skeleton jadi overlay absolute DI ATASNYA, bukan
+             gantiin lewat toggle hidden. */
         }
+        <div data-viewer class="h-full w-full">
+          {
+            punyaSpinToggle ? (
+              <>
+                <div data-viewer-canvas class="h-full w-full" />
+                <button
+                  type="button"
+                  data-action="toggle-spin"
+                  class="absolute right-2 top-2 rounded-full border border-primary bg-secondary-bright px-2 py-1 text-xs text-primary-darken"
+                >
+                  &#9208; Stop putar
+                </button>
+              </>
+            ) : viewerKind === "image" ? (
+              <img data-viewer-img alt={title} class="h-full w-full object-contain bg-secondary-bright" />
+            ) : viewerKind === "geo-vector" || viewerKind === "geo-raster" ? (
+              <div data-viewer-map class="h-full w-full" />
+            ) : (
+              <span class="flex h-full items-center justify-center px-4 text-center text-sm text-neutralblack/60">
+                Viewer tipe <strong>{tipeArtefak}</strong> — belum ada sumber artefak untuk ditampilkan.
+              </span>
+            )
+          }
+        </div>
+        <div data-skeleton class="absolute inset-0 flex animate-pulse items-center justify-center bg-secondary">
+          <span class="text-sm text-primary/70">Memuat viewer&hellip;</span>
+        </div>
       </div>
 
       <dl class="mt-4 grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
@@ -123,40 +173,203 @@ const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
 </div>
 
 <script>
-  // 3Dmol.js dimuat sekali dari CDN saat viewer kristal pertama kali dibuka.
-  let mol3dLoader: Promise<any> | null = null;
+  // ---- Helper generik: muat <script>/<link> dari CDN sekali saja ----
+  const scriptLoaders = new Map<string, Promise<void>>();
+  function loadScript(src: string): Promise<void> {
+    if ((window as any)[`__loaded_${src}`]) return Promise.resolve();
+    if (!scriptLoaders.has(src)) {
+      scriptLoaders.set(
+        src,
+        new Promise((resolve, reject) => {
+          const el = document.createElement("script");
+          el.src = src;
+          el.onload = () => resolve();
+          el.onerror = () => reject(new Error(`Gagal memuat ${src}`));
+          document.head.appendChild(el);
+        }),
+      );
+    }
+    return scriptLoaders.get(src)!;
+  }
+  function loadCSS(href: string) {
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const el = document.createElement("link");
+    el.rel = "stylesheet";
+    el.href = href;
+    document.head.appendChild(el);
+  }
+
+  // ---- kristal: 3Dmol.js ----
   function load3Dmol(): Promise<any> {
     const w = window as any;
     if (w.$3Dmol) return Promise.resolve(w.$3Dmol);
-    if (!mol3dLoader) {
-      mol3dLoader = new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "https://3dmol.org/build/3Dmol-min.js";
-        script.onload = () => resolve((window as any).$3Dmol);
-        script.onerror = () => reject(new Error("Gagal memuat 3Dmol.js"));
-        document.head.appendChild(script);
-      });
-    }
-    return mol3dLoader;
+    return loadScript("https://3dmol.org/build/3Dmol-min.js").then(() => (window as any).$3Dmol);
   }
 
-  async function initKristalViewer(dialog: HTMLDialogElement, canvas: HTMLElement) {
-    const url = dialog.dataset.url;
-    if (!url || canvas.dataset.initialized) return;
-    canvas.dataset.initialized = "true";
-
+  async function initKristalViewer(canvas: HTMLElement, url: string) {
     const [$3Dmol, cifText] = await Promise.all([load3Dmol(), fetch(url).then((r) => r.text())]);
-
     const glviewer = $3Dmol.createViewer(canvas, { backgroundColor: "white" });
     glviewer.addModel(cifText, "cif", { doAssembly: true, normalizeAssembly: true });
     glviewer.setStyle({}, { sphere: { scale: 0.3, colorscheme: "Jmol" }, stick: { radius: 0.08, colorscheme: "Jmol" } });
     glviewer.addUnitCell();
-    glviewer.zoomTo();
     glviewer.spin(true);
+    glviewer.zoomTo();
     glviewer.render();
     canvas.dataset.spinning = "true";
+    (canvas as any)._viewerControl = {
+      resize: () => glviewer.resize(),
+      toggleSpin: () => {
+        const spinning = canvas.dataset.spinning === "true";
+        glviewer.spin(!spinning);
+        canvas.dataset.spinning = String(!spinning);
+        return !spinning;
+      },
+    };
+  }
 
-    (canvas as any)._glviewer = glviewer;
+  // ---- part-cad: three.js + STLLoader + OrbitControls ----
+  // Import pakai URL penuh (bukan specifier "three" telanjang) supaya Vite
+  // tidak ikut mencoba me-resolve-nya saat dev — file addon ini baru betul
+  // dieksekusi oleh browser, dan import "three" DI DALAM addon itu sendiri
+  // diresolusi lewat <script type="importmap"> yang dirender di atas.
+  const THREE_VERSION = "0.160.0";
+  let threeLoader: Promise<any> | null = null;
+  function loadThree() {
+    if (!threeLoader) {
+      threeLoader = Promise.all([
+        import(/* @vite-ignore */ `https://cdn.jsdelivr.net/npm/three@${THREE_VERSION}/build/three.module.js`),
+        import(/* @vite-ignore */ `https://cdn.jsdelivr.net/npm/three@${THREE_VERSION}/examples/jsm/loaders/STLLoader.js`),
+        import(/* @vite-ignore */ `https://cdn.jsdelivr.net/npm/three@${THREE_VERSION}/examples/jsm/controls/OrbitControls.js`),
+      ]).then(([THREE, stl, orbit]) => ({ THREE, STLLoader: stl.STLLoader, OrbitControls: orbit.OrbitControls }));
+    }
+    return threeLoader;
+  }
+
+  async function initPartCadViewer(canvas: HTMLElement, url: string) {
+    const { THREE, STLLoader, OrbitControls } = await loadThree();
+    const width = canvas.clientWidth || 640;
+    const height = canvas.clientHeight || 360;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xfdf8cf);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(width, height);
+    canvas.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(1, 1, 1);
+    scene.add(light);
+
+    const geometry = await new STLLoader().loadAsync(url);
+    geometry.center();
+    geometry.computeBoundingSphere();
+    const material = new THREE.MeshStandardMaterial({ color: 0x560b18 });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    const radius = geometry.boundingSphere?.radius || 50;
+    camera.position.set(radius * 2, radius * 1.6, radius * 2);
+    camera.lookAt(0, 0, 0);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.autoRotate = true;
+
+    let raf = 0;
+    function animate() {
+      controls.update();
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(animate);
+    }
+    animate();
+
+    (canvas as any)._viewerControl = {
+      resize: () => {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      },
+      toggleSpin: () => {
+        controls.autoRotate = !controls.autoRotate;
+        return controls.autoRotate;
+      },
+      dispose: () => cancelAnimationFrame(raf),
+    };
+  }
+
+  // ---- skematik/pcb: gambar statis ----
+  async function initImageViewer(img: HTMLImageElement, url: string) {
+    img.src = url;
+    if (typeof img.decode === "function") {
+      await img.decode().catch(() => {});
+    }
+  }
+
+  // ---- Leaflet (dipakai geo-vector & geo-raster) ----
+  function loadLeaflet(): Promise<any> {
+    loadCSS("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+    return loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js").then(() => (window as any).L);
+  }
+
+  function baseMap(L: any, container: HTMLElement) {
+    const map = L.map(container, { scrollWheelZoom: false });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+      maxZoom: 19,
+    }).addTo(map);
+    return map;
+  }
+
+  // ---- geofisika-profil: vektor (GeoJSON / KML / Shapefile-zip) ----
+  async function initGeoVectorViewer(container: HTMLElement, url: string) {
+    const L = await loadLeaflet();
+    const map = baseMap(L, container);
+    const lower = url.toLowerCase();
+
+    let layer: any;
+    if (lower.endsWith(".kml")) {
+      await loadScript("https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js");
+      layer = (window as any).omnivore.kml(url).addTo(map);
+      await new Promise((resolve) => layer.on("ready", resolve));
+    } else if (lower.endsWith(".zip")) {
+      await loadScript("https://unpkg.com/shpjs@4.0.4/dist/shp.js");
+      const geojson = await (window as any).shp(url);
+      layer = L.geoJSON(geojson).addTo(map);
+    } else {
+      const geojson = await fetch(url).then((r) => r.json());
+      layer = L.geoJSON(geojson, {
+        pointToLayer: (_f: any, latlng: any) => L.circleMarker(latlng, { radius: 6, color: "#560b18", fillOpacity: 0.8 }),
+        style: { color: "#560b18", weight: 3 },
+      }).addTo(map);
+    }
+
+    const bounds = layer.getBounds?.();
+    if (bounds?.isValid?.()) map.fitBounds(bounds, { padding: [16, 16] });
+
+    (container as any)._viewerControl = { resize: () => map.invalidateSize() };
+  }
+
+  // ---- geofisika-mesh: raster (GeoTIFF via georaster) ----
+  async function initGeoRasterViewer(container: HTMLElement, url: string) {
+    const [L] = await Promise.all([
+      loadLeaflet(),
+      loadScript("https://unpkg.com/georaster@1.6.0/dist/georaster.browser.bundle.min.js"),
+    ]);
+    await loadScript("https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js");
+
+    const map = baseMap(L, container);
+    const arrayBuffer = await fetch(url).then((r) => r.arrayBuffer());
+    const georaster = await (window as any).parseGeoraster(arrayBuffer);
+    const layer = new (window as any).GeoRasterLayer({ georaster, opacity: 0.85, resolution: 128 });
+    layer.addTo(map);
+    map.fitBounds(layer.getBounds(), { padding: [16, 16] });
+
+    (container as any)._viewerControl = { resize: () => map.invalidateSize() };
   }
 
   function initArtifactShell(shell: HTMLElement) {
@@ -167,27 +380,35 @@ const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
     const citationBtn = shell.querySelector<HTMLButtonElement>('[data-action="copy-citation"]');
     const spinBtn = shell.querySelector<HTMLButtonElement>('[data-action="toggle-spin"]');
     const skeleton = shell.querySelector<HTMLElement>("[data-skeleton]");
-    const viewer = shell.querySelector<HTMLElement>("[data-viewer]");
     const canvas = shell.querySelector<HTMLElement>("[data-viewer-canvas]");
+    const img = shell.querySelector<HTMLImageElement>("[data-viewer-img]");
+    const mapEl = shell.querySelector<HTMLElement>("[data-viewer-map]");
     if (!expandBtn || !dialog) return;
+
+    const target = (canvas ?? img ?? mapEl) as (HTMLElement & { _viewerControl?: any }) | null;
 
     expandBtn.addEventListener("click", () => {
       dialog.showModal();
       skeleton?.removeAttribute("hidden");
-      viewer?.setAttribute("hidden", "");
 
-      const ready =
-        dialog.dataset.tipeArtefak === "kristal" && canvas
-          ? initKristalViewer(dialog, canvas)
-          : new Promise((resolve) => window.setTimeout(resolve, 400));
+      const kind = dialog.dataset.viewerKind;
+      const url = dialog.dataset.url;
+      let ready: Promise<unknown> = new Promise((resolve) => window.setTimeout(resolve, 300));
 
-      Promise.resolve(ready)
+      if (url && target && !(target as any).dataset?.initialized) {
+        if (target.dataset) target.dataset.initialized = "true";
+        if (kind === "kristal" && canvas) ready = initKristalViewer(canvas, url);
+        else if (kind === "3d" && canvas) ready = initPartCadViewer(canvas, url);
+        else if (kind === "image" && img) ready = initImageViewer(img, url);
+        else if (kind === "geo-vector" && mapEl) ready = initGeoVectorViewer(mapEl, url);
+        else if (kind === "geo-raster" && mapEl) ready = initGeoRasterViewer(mapEl, url);
+      }
+
+      ready
         .catch((err) => console.error(err))
         .finally(() => {
           skeleton?.setAttribute("hidden", "");
-          viewer?.removeAttribute("hidden");
-          const glviewer = canvas && (canvas as any)._glviewer;
-          glviewer?.resize();
+          window.setTimeout(() => target?._viewerControl?.resize?.(), 30);
         });
     });
 
@@ -202,17 +423,13 @@ const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
     });
 
     document.addEventListener("fullscreenchange", () => {
-      const glviewer = canvas && (canvas as any)._glviewer;
-      window.setTimeout(() => glviewer?.resize(), 50);
+      window.setTimeout(() => target?._viewerControl?.resize?.(), 50);
     });
 
     spinBtn?.addEventListener("click", () => {
-      const glviewer = canvas && (canvas as any)._glviewer;
-      if (!glviewer || !canvas) return;
-      const spinning = canvas.dataset.spinning === "true";
-      glviewer.spin(!spinning);
-      canvas.dataset.spinning = String(!spinning);
-      spinBtn.textContent = spinning ? "▶ Putar" : "⏸ Stop putar";
+      const spinning = target?._viewerControl?.toggleSpin?.();
+      if (spinning === undefined) return;
+      spinBtn.textContent = spinning ? "⏸ Stop putar" : "▶ Putar";
     });
 
     citationBtn?.addEventListener("click", async () => {
