@@ -1,0 +1,234 @@
+---
+// Shell viewer artefak riset/proyek — satu struktur dipakai lintas semua
+// tipeArtefak (kristal, plot geofisika, part robot, skematik/PCB): preview
+// card -> tap expand -> skeleton -> viewer -> metadata -> action bar.
+// Viewer kristal 3D (3Dmol.js) sudah diimplementasi nyata; tipe lain masih
+// placeholder sampai ada library yang cocok (model-viewer/Plotly/dst).
+interface MetaItem {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  id: string;
+  title: string;
+  subtitle?: string;
+  tipeArtefak: string;
+  metadata: MetaItem[];
+  downloadUrl?: string;
+  citation?: string;
+  dataUrl?: string;
+}
+
+const { id, title, subtitle, tipeArtefak, metadata, downloadUrl, citation, dataUrl } = Astro.props;
+const dialogId = `artifact-dialog-${id}`;
+const punyaViewerKristal = tipeArtefak === "kristal" && Boolean(dataUrl);
+---
+
+<div class="artifact-shell" data-artifact-id={id}>
+  <button
+    type="button"
+    data-action="expand"
+    aria-haspopup="dialog"
+    class="w-full rounded-lg border border-primary/30 bg-secondary-bright px-4 py-3 text-left shadow-sm transition hover:shadow-md"
+  >
+    <p class="font-bold text-primary-darken">{title}</p>
+    {subtitle && <p class="text-sm text-primary">{subtitle}</p>}
+    <p class="mt-1 text-xs text-neutralblack/60">Tap untuk buka viewer &rarr;</p>
+  </button>
+
+  <dialog
+    id={dialogId}
+    class="artifact-dialog w-full max-w-2xl rounded-lg p-0 backdrop:bg-black/50"
+    data-tipe-artefak={tipeArtefak}
+    data-url={dataUrl}
+  >
+    <div class="flex items-center justify-between border-b border-primary/20 p-4">
+      <h2 class="font-heading font-bold text-primary-darken">{title}</h2>
+      <button type="button" data-action="close" aria-label="Tutup" class="text-neutralblack/60 hover:text-neutralblack">
+        &#10005;
+      </button>
+    </div>
+
+    <div class="p-4">
+      <div data-skeleton class="flex aspect-video w-full animate-pulse items-center justify-center rounded-lg bg-secondary">
+        <span class="text-sm text-primary/70">Memuat viewer&hellip;</span>
+      </div>
+      <div data-viewer hidden class="relative aspect-video w-full overflow-hidden rounded-lg border border-dashed border-primary/30 bg-secondary-bright">
+        {
+          punyaViewerKristal ? (
+            <>
+              <div data-viewer-canvas class="h-full w-full" />
+              <button
+                type="button"
+                data-action="toggle-spin"
+                class="absolute right-2 top-2 rounded-full border border-primary bg-secondary-bright px-2 py-1 text-xs text-primary-darken"
+              >
+                &#9208; Stop putar
+              </button>
+            </>
+          ) : (
+            <span class="flex h-full items-center justify-center px-4 text-center text-sm text-neutralblack/60">
+              Viewer tipe <strong>{tipeArtefak}</strong> — segera hadir (model-viewer / Plotly / InteractiveHtmlBom)
+            </span>
+          )
+        }
+      </div>
+
+      <dl class="mt-4 grid grid-cols-1 gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
+        {
+          metadata.map((m) => (
+            <div>
+              <dt class="font-medium text-neutralblack/60">{m.label}</dt>
+              <dd class="text-neutralblack">{m.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="flex flex-wrap gap-2 border-t border-primary/20 p-4">
+      <button
+        type="button"
+        data-action="fullscreen"
+        class="rounded-full border border-primary px-3 py-1 text-sm text-primary-darken"
+      >
+        Fullscreen
+      </button>
+      {
+        downloadUrl && (
+          <a
+            href={downloadUrl}
+            download
+            class="rounded-full border border-primary px-3 py-1 text-sm text-primary-darken"
+          >
+            Unduh sumber
+          </a>
+        )
+      }
+      {
+        citation && (
+          <button
+            type="button"
+            data-action="copy-citation"
+            data-citation={citation}
+            class="rounded-full border border-primary px-3 py-1 text-sm text-primary-darken"
+          >
+            Salin sitasi
+          </button>
+        )
+      }
+    </div>
+  </dialog>
+</div>
+
+<script>
+  // 3Dmol.js dimuat sekali dari CDN saat viewer kristal pertama kali dibuka.
+  let mol3dLoader: Promise<any> | null = null;
+  function load3Dmol(): Promise<any> {
+    const w = window as any;
+    if (w.$3Dmol) return Promise.resolve(w.$3Dmol);
+    if (!mol3dLoader) {
+      mol3dLoader = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://3dmol.org/build/3Dmol-min.js";
+        script.onload = () => resolve((window as any).$3Dmol);
+        script.onerror = () => reject(new Error("Gagal memuat 3Dmol.js"));
+        document.head.appendChild(script);
+      });
+    }
+    return mol3dLoader;
+  }
+
+  async function initKristalViewer(dialog: HTMLDialogElement, canvas: HTMLElement) {
+    const url = dialog.dataset.url;
+    if (!url || canvas.dataset.initialized) return;
+    canvas.dataset.initialized = "true";
+
+    const [$3Dmol, cifText] = await Promise.all([load3Dmol(), fetch(url).then((r) => r.text())]);
+
+    const glviewer = $3Dmol.createViewer(canvas, { backgroundColor: "white" });
+    glviewer.addModel(cifText, "cif", { doAssembly: true, normalizeAssembly: true });
+    glviewer.setStyle({}, { sphere: { scale: 0.3, colorscheme: "Jmol" }, stick: { radius: 0.08, colorscheme: "Jmol" } });
+    glviewer.addUnitCell();
+    glviewer.zoomTo();
+    glviewer.spin(true);
+    glviewer.render();
+    canvas.dataset.spinning = "true";
+
+    (canvas as any)._glviewer = glviewer;
+  }
+
+  function initArtifactShell(shell: HTMLElement) {
+    const expandBtn = shell.querySelector<HTMLButtonElement>('[data-action="expand"]');
+    const dialog = shell.querySelector<HTMLDialogElement>("dialog");
+    const closeBtn = shell.querySelector<HTMLButtonElement>('[data-action="close"]');
+    const fullscreenBtn = shell.querySelector<HTMLButtonElement>('[data-action="fullscreen"]');
+    const citationBtn = shell.querySelector<HTMLButtonElement>('[data-action="copy-citation"]');
+    const spinBtn = shell.querySelector<HTMLButtonElement>('[data-action="toggle-spin"]');
+    const skeleton = shell.querySelector<HTMLElement>("[data-skeleton]");
+    const viewer = shell.querySelector<HTMLElement>("[data-viewer]");
+    const canvas = shell.querySelector<HTMLElement>("[data-viewer-canvas]");
+    if (!expandBtn || !dialog) return;
+
+    expandBtn.addEventListener("click", () => {
+      dialog.showModal();
+      skeleton?.removeAttribute("hidden");
+      viewer?.setAttribute("hidden", "");
+
+      const ready =
+        dialog.dataset.tipeArtefak === "kristal" && canvas
+          ? initKristalViewer(dialog, canvas)
+          : new Promise((resolve) => window.setTimeout(resolve, 400));
+
+      Promise.resolve(ready)
+        .catch((err) => console.error(err))
+        .finally(() => {
+          skeleton?.setAttribute("hidden", "");
+          viewer?.removeAttribute("hidden");
+          const glviewer = canvas && (canvas as any)._glviewer;
+          glviewer?.resize();
+        });
+    });
+
+    closeBtn?.addEventListener("click", () => dialog.close());
+
+    fullscreenBtn?.addEventListener("click", () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        dialog.requestFullscreen();
+      }
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      const glviewer = canvas && (canvas as any)._glviewer;
+      window.setTimeout(() => glviewer?.resize(), 50);
+    });
+
+    spinBtn?.addEventListener("click", () => {
+      const glviewer = canvas && (canvas as any)._glviewer;
+      if (!glviewer || !canvas) return;
+      const spinning = canvas.dataset.spinning === "true";
+      glviewer.spin(!spinning);
+      canvas.dataset.spinning = String(!spinning);
+      spinBtn.textContent = spinning ? "▶ Putar" : "⏸ Stop putar";
+    });
+
+    citationBtn?.addEventListener("click", async () => {
+      const text = citationBtn.dataset.citation ?? "";
+      await navigator.clipboard.writeText(text);
+      const original = citationBtn.textContent;
+      citationBtn.textContent = "Tersalin!";
+      window.setTimeout(() => {
+        citationBtn.textContent = original;
+      }, 1500);
+    });
+  }
+
+  // astro:page-load jalan di initial load dan tiap selesai navigasi
+  // (View Transitions) — samakan pola dengan Navbar.astro.
+  document.addEventListener("astro:page-load", () => {
+    document.querySelectorAll<HTMLElement>(".artifact-shell").forEach(initArtifactShell);
+  });
+</script>

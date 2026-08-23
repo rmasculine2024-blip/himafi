@@ -1,0 +1,80 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const semuaCourse = await getCollection("phypath");
+  return semuaCourse.flatMap((course) =>
+    course.data.modul.flatMap((modul) =>
+      modul.lesson.map((lesson) => ({
+        params: { course: course.id, lesson: lesson.slug },
+        props: { course, lesson },
+      })),
+    ),
+  );
+}
+
+const { course, lesson } = Astro.props;
+---
+
+<Layout Pagetitle={lesson.judul} description={course.data.judul}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-course-id={course.id} data-lesson-slug={lesson.slug}>
+    <a
+      href={`/phypath/${course.id}`}
+      class="text-sm font-semibold text-primary-darken hover:text-teritary transition-colors"
+    >
+      &larr; Kembali ke {course.data.judul}
+    </a>
+
+    <h1 class="mt-4 font-heading text-2xl sm:text-3xl font-black text-primary-darken">{lesson.judul}</h1>
+
+    {
+      lesson.tipe === "video" && lesson.videoUrl && (
+        <div class="mt-6 aspect-video w-full overflow-hidden rounded-lg bg-neutralblack">
+          <iframe
+            src={lesson.videoUrl}
+            title={lesson.judul}
+            class="h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          />
+        </div>
+      )
+    }
+
+    {
+      lesson.tipe === "reading" && lesson.konten && (
+        <div class="prose prose-stone mt-6 max-w-none prose-headings:font-subhead prose-headings:text-primary-darken prose-p:font-isi">
+          <p>{lesson.konten}</p>
+        </div>
+      )
+    }
+
+    <div class="mt-8 flex items-center gap-3 border-t border-primary/20 pt-6">
+      <label class="flex items-center gap-2 text-sm text-neutralblack">
+        <input type="checkbox" data-mark-done />
+        Tandai selesai
+      </label>
+      <span class="text-xs text-neutralblack/50">Tersimpan di perangkat ini saja.</span>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { isDone, setDone } from "../../../lib/progress.ts";
+
+  function init() {
+    const container = document.querySelector("[data-course-id]");
+    const courseId = container?.getAttribute("data-course-id");
+    const lessonSlug = container?.getAttribute("data-lesson-slug");
+    const checkbox = document.querySelector("[data-mark-done]");
+    if (!courseId || !lessonSlug || !(checkbox instanceof HTMLInputElement)) return;
+
+    checkbox.checked = isDone(courseId, lessonSlug);
+    checkbox.addEventListener("change", () => {
+      setDone(courseId, lessonSlug, checkbox.checked);
+    });
+  }
+
+  document.addEventListener("astro:page-load", init);
+</script>

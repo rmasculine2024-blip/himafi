@@ -1,0 +1,63 @@
+---
+interface Props {
+  options: readonly string[];
+  allLabel?: string;
+  groupId: string;
+}
+
+const { options, allLabel = "Semua", groupId } = Astro.props;
+---
+
+<div class="flex flex-wrap gap-2" data-filter-chips={groupId}>
+  <button
+    type="button"
+    data-filter-value="__all__"
+    aria-pressed="true"
+    class="rounded-full border border-primary px-3 py-1 text-sm text-primary-darken transition data-[active=true]:bg-primary data-[active=true]:text-secondary-bright"
+    data-active="true"
+  >
+    {allLabel}
+  </button>
+  {
+    options.map((opt) => (
+      <button
+        type="button"
+        data-filter-value={opt}
+        aria-pressed="false"
+        class="rounded-full border border-primary px-3 py-1 text-sm text-primary-darken transition data-[active=true]:bg-primary data-[active=true]:text-secondary-bright"
+        data-active="false"
+      >
+        {opt}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  function initFilterChips(chips: HTMLElement) {
+    const groupId = chips.dataset.filterChips;
+    const buttons = chips.querySelectorAll<HTMLButtonElement>("[data-filter-value]");
+    const items = document.querySelectorAll<HTMLElement>(`[data-filter-group="${groupId}"] [data-filter-item]`);
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => {
+          b.dataset.active = "false";
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.dataset.active = "true";
+        btn.setAttribute("aria-pressed", "true");
+
+        const value = btn.dataset.filterValue;
+        items.forEach((item) => {
+          const match = value === "__all__" || item.dataset.filterItem === value;
+          item.hidden = !match;
+        });
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    document.querySelectorAll<HTMLElement>("[data-filter-chips]").forEach(initFilterChips);
+  });
+</script>

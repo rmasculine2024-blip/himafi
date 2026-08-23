@@ -9,6 +9,9 @@ const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const menu = [
   { href: "/", label: "Beranda" },
   { href: "/about", label: "Tentang" },
+  { href: "/riset", label: "Riset" },
+  { href: "/proyek", label: "Proyek" },
+  { href: "/phypath", label: "Phypath" },
   { href: "/news", label: "Berita" },
   { href: "/contact", label: "Kontak" },
   { href: "/utility", label: "Utilitas", hidden: true },
@@ -37,7 +40,7 @@ const isActive = (href: string) =>
 
     <!-- Menu Desktop -->
     <div class="hidden md:flex">
-      <ul class="flex gap-8">
+      <ul class="flex gap-3 lg:gap-8">
         {
           menu.map(({ href, label, hidden }) => (
             <li class={hidden ? "hidden" : undefined}>

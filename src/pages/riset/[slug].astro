@@ -1,0 +1,89 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ArtifactViewer from "../../components/ArtifactViewer.astro";
+
+export async function getStaticPaths() {
+  const semuaRiset = await getCollection("riset");
+  return semuaRiset.map((r) => ({ params: { slug: r.id }, props: { entry: r } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const r = entry.data;
+
+const metadata = [
+  { label: "Peminatan", value: r.peminatan },
+  { label: "Tahun", value: String(r.tahun) },
+  { label: "Dosen Pembimbing", value: r.dosenPembimbing },
+  ...(r.dataset
+    ? [
+        { label: "Cara Pengumpulan Data", value: r.dataset.caraPengumpulan },
+        { label: "Ukuran Dataset", value: r.dataset.ukuran },
+        { label: "Lisensi", value: r.dataset.lisensi },
+      ]
+    : []),
+];
+
+const citation = `${r.penulis.join(", ")} (${r.tahun}). ${r.judul}. Himpunan Mahasiswa Fisika UIN Syarif Hidayatullah Jakarta.`;
+---
+
+<Layout Pagetitle={r.judul} description={r.abstrak}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <a href="/riset" class="text-sm font-semibold text-primary-darken hover:text-teritary transition-colors">
+      &larr; Kembali ke Riset
+    </a>
+
+    <p class="mt-4 text-xs font-bold uppercase tracking-widest text-teritary">
+      {r.peminatan} · {r.tahun}
+    </p>
+    <h1 class="mt-1 font-heading text-2xl sm:text-3xl font-black text-primary-darken">{r.judul}</h1>
+    <p class="mt-1 text-sm text-primary/70">
+      {r.penulis.join(", ")} · dibimbing oleh {r.dosenPembimbing}
+    </p>
+
+    {
+      r.tipeArtefak !== "tidak-ada" && (
+        <div class="mt-6">
+          <ArtifactViewer
+            id={entry.id}
+            title={r.judul}
+            subtitle={`${r.peminatan} · ${r.tahun}`}
+            tipeArtefak={r.tipeArtefak}
+            metadata={metadata}
+            downloadUrl={r.dataset?.tautanUnduh}
+            citation={citation}
+            dataUrl={r.artefakUrl}
+          />
+        </div>
+      )
+    }
+
+    <section class="mt-8">
+      <h2 class="font-subhead text-lg font-bold text-primary-darken">Abstrak</h2>
+      <p class="mt-2 text-neutralblack/80">{r.abstrak}</p>
+    </section>
+
+    <section class="mt-6">
+      <h2 class="font-subhead text-lg font-bold text-primary-darken">Metodologi</h2>
+      <p class="mt-2 text-neutralblack/80">{r.metodologi}</p>
+    </section>
+
+    <div class="prose prose-stone mt-6 max-w-none prose-headings:font-subhead prose-headings:text-primary-darken prose-p:font-isi">
+      <Content />
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-3 text-sm">
+      {r.tautanNaskah && (
+        <a
+          href={r.tautanNaskah}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rounded-full border border-primary px-4 py-1.5 text-primary-darken"
+        >
+          Baca naskah lengkap
+        </a>
+      )}
+    </div>
+  </div>
+</Layout>

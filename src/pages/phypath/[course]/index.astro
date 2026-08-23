@@ -1,0 +1,125 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const semuaCourse = await getCollection("phypath");
+  return semuaCourse.map((course) => ({ params: { course: course.id }, props: { course } }));
+}
+
+const { course } = Astro.props;
+const c = course.data;
+---
+
+<Layout Pagetitle={c.judul} description={c.deskripsi}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10" data-course-id={course.id}>
+    <a href="/phypath" class="text-sm font-semibold text-primary-darken hover:text-teritary transition-colors">
+      &larr; Kembali ke Phypath
+    </a>
+
+    {c.peminatanTag && (
+      <p class="mt-4 text-xs font-bold uppercase tracking-widest text-teritary">{c.peminatanTag}</p>
+    )}
+    <h1 class="mt-1 font-heading text-2xl sm:text-3xl font-black text-primary-darken">{c.judul}</h1>
+    <p class="mt-2 text-neutralblack/80">{c.deskripsi}</p>
+
+    <div class="mt-8 flex flex-col gap-8">
+      {
+        c.modul.map((modul, modulIndex) => (
+          <section class="rounded-lg border border-primary/20 bg-secondary-bright p-5">
+            <h2 class="font-subhead text-lg font-bold text-primary-darken">{modul.judul}</h2>
+
+            <ul class="mt-3 flex flex-col gap-2">
+              {modul.lesson.map((lesson) => (
+                <li>
+                  <a
+                    href={`/phypath/${course.id}/${lesson.slug}`}
+                    class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-neutralblack hover:bg-secondary"
+                  >
+                    <span aria-hidden="true">{lesson.tipe === "video" ? "▶" : "📄"}</span>
+                    <span class="flex-1">{lesson.judul}</span>
+                    <span data-lesson-status={`${course.id}/${lesson.slug}`} class="text-xs font-semibold text-primary-darken/60" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            {modul.kuis && (
+              <details class="mt-4 rounded-md bg-secondary p-3">
+                <summary class="cursor-pointer text-sm font-semibold text-primary-darken">Kuis self-check</summary>
+                <form data-quiz-form class="mt-3 flex flex-col gap-4">
+                  {modul.kuis.pertanyaan.map((q, qIndex) => (
+                    <fieldset class="text-sm">
+                      <legend class="font-medium text-neutralblack">{q.soal}</legend>
+                      <div class="mt-1 flex flex-col gap-1">
+                        {q.pilihan.map((opt, optIndex) => (
+                          <label class="flex items-center gap-2">
+                            <input type="radio" name={`q${modulIndex}-${qIndex}`} value={optIndex} required />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                      <p data-quiz-answer data-correct-index={q.jawabanIndex} class="mt-1 text-sm font-semibold" />
+                    </fieldset>
+                  ))}
+                  <button type="submit" class="self-start rounded-full border border-primary px-4 py-1.5 text-sm text-primary-darken">
+                    Cek jawaban
+                  </button>
+                  <p class="text-xs text-neutralblack/50">Self-check saja — belum ada skor tersimpan.</p>
+                </form>
+              </details>
+            )}
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { isDone } from "../../../lib/progress.ts";
+
+  function initQuizForms() {
+    document.querySelectorAll("[data-quiz-form]").forEach((form) => {
+      if (form.dataset.bound) return;
+      form.dataset.bound = "true";
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        form.querySelectorAll("fieldset").forEach((fieldset) => {
+          const input = fieldset.querySelector("input[type=radio]:checked");
+          const answerEl = fieldset.querySelector("[data-quiz-answer]");
+          if (!input || !answerEl) return;
+          const correctIndex = Number(answerEl.dataset.correctIndex);
+          const chosenIndex = Number(input.value);
+          if (chosenIndex === correctIndex) {
+            answerEl.textContent = "✓ Benar";
+            answerEl.classList.add("text-green-700");
+            answerEl.classList.remove("text-red-700");
+          } else {
+            answerEl.textContent = "✕ Kurang tepat, coba lagi.";
+            answerEl.classList.add("text-red-700");
+            answerEl.classList.remove("text-green-700");
+          }
+        });
+      });
+    });
+  }
+
+  function markLessonStatuses() {
+    const courseId = document.querySelector("[data-course-id]")?.getAttribute("data-course-id");
+    if (!courseId) return;
+    document.querySelectorAll("[data-lesson-status]").forEach((el) => {
+      const key = el.getAttribute("data-lesson-status");
+      if (!key) return;
+      const [, lessonSlug] = key.split("/");
+      if (isDone(courseId, lessonSlug)) {
+        el.textContent = "✓ selesai";
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    initQuizForms();
+    markLessonStatuses();
+  });
+</script>

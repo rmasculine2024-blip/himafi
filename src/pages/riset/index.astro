@@ -1,0 +1,53 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Section from "../../components/Section.astro";
+import Container from "../../components/Container.astro";
+import H1 from "../../components/H1.astro";
+import Paragraph from "../../components/Paragraph.astro";
+import FilterChips from "../../components/FilterChips.astro";
+import { PEMINATAN } from "../../content.config.ts";
+
+const title = "Riset";
+const semuaRiset = await getCollection("riset");
+const sorted = [...semuaRiset].sort((a, b) => b.data.tahun - a.data.tahun);
+---
+
+<Layout Pagetitle={title}>
+  <Section mode="dark">
+    <Container class="py-28 md:py-32">
+      <div class="mx-auto max-w-2xl">
+        <H1 text={title} mode="center" />
+        <Paragraph text="Jejak riset & thesis mahasiswa Fisika UIN Jakarta, per peminatan." mode="center" />
+      </div>
+
+      <div class="mt-10 flex justify-center">
+        <FilterChips groupId="riset" options={PEMINATAN} />
+      </div>
+
+      <ul
+        data-filter-group="riset"
+        class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 border-t border-secondary-bright/30 pt-12"
+      >
+        {
+          sorted.map((r) => (
+            <li data-filter-item={r.data.peminatan}>
+              <a
+                href={`/riset/${r.id}`}
+                class="block h-full rounded-lg bg-secondary-bright p-5 shadow-sm transition hover:shadow-lg"
+              >
+                <span class="text-xs font-bold uppercase tracking-widest text-teritary">
+                  {r.data.peminatan} · {r.data.tahun}
+                </span>
+                <h3 class="mt-2 font-heading font-bold text-primary-darken">{r.data.judul}</h3>
+                <p class="mt-2 line-clamp-3 text-sm text-primary">{r.data.abstrak}</p>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      {sorted.length < 1 && <Paragraph text="Belum ada riset yang terdaftar." mode="center" />}
+    </Container>
+  </Section>
+</Layout>
