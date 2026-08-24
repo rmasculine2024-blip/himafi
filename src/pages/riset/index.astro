@@ -21,6 +21,23 @@ const sorted = [...semuaRiset].sort((a, b) => b.data.tahun - a.data.tahun);
         <Paragraph text="Jejak riset & thesis mahasiswa Fisika UIN Jakarta, per peminatan." mode="center" />
       </div>
 
+      <a
+        href="https://repository.uinjkt.ac.id/dspace/handle/123456789/155"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mx-auto mt-10 flex max-w-2xl items-center gap-4 rounded-lg border border-teritary bg-teritary/10 p-4 transition hover:bg-teritary/20"
+      >
+        <span class="text-2xl" aria-hidden="true">📚</span>
+        <span>
+          <span class="block font-heading font-bold text-primary-darken">
+            Jelajahi arsip lengkap Skripsi Fisika UIN Jakarta
+          </span>
+          <span class="block text-sm text-primary/80">
+            588+ skripsi terindeks di Repository UIN Syarif Hidayatullah Jakarta — beberapa contoh menarik kami tampilkan di bawah, arsip penuhnya ada di sana.
+          </span>
+        </span>
+      </a>
+
       <div class="mt-10 flex justify-center">
         <FilterChips groupId="riset" options={PEMINATAN} />
       </div>
