@@ -1,0 +1,14 @@
+{
+  "type": "FeatureCollection",
+  "name": "lokasi-penelitian-rajabasa",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "nama": "Kecamatan Rajabasa, Lampung Selatan",
+        "keterangan": "Lokasi penelitian (level kecamatan) — bukan titik survei presisi. Menghadap Selat Sunda ke arah Gunung Anak Krakatau."
+      },
+      "geometry": { "type": "Point", "coordinates": [105.59644394, -5.80449499] }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "FeatureCollection",
+  "name": "lokasi-penelitian-muara-enim",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "nama": "Muara Enim, Sumatera Selatan",
+        "keterangan": "Lokasi penelitian (level kabupaten, Formasi Muara Enim) — bukan titik sumur/logging presisi."
+      },
+      "geometry": { "type": "Point", "coordinates": [103.6141, -4.2327] }
+    }
+  ]
+}
