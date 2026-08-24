@@ -1,0 +1,22 @@
+---
+nama: "Monitor Kelembaban Tanah (ESP32 + FC-28)"
+levelBadge: "Foundry"
+tahun: 2026
+status: "selesai"
+deskripsi: "Alat baca kelembaban tanah pakai sensor FC-28, ditampilkan langsung di layar OLED. Dijalankan dari baterai LiPo lewat ESP32 DEVKIT supaya bisa dipakai portable tanpa kabel USB, dengan 2 push button untuk kontrol dasar (mis. power/ganti tampilan)."
+bom:
+  - nama: "Sensor kelembaban tanah FC-28 (probe + modul komparator)"
+    jumlah: 1
+  - nama: "ESP32 DEVKIT (ESP-WROOM-32, WiFi+BLE)"
+    jumlah: 1
+  - nama: "OLED display I2C 0.96\""
+    jumlah: 1
+  - nama: "Push button"
+    jumlah: 2
+  - nama: "Baterai LiPo 3.7V 1000mAh"
+    jumlah: 1
+tipeArtefak: "skematik"
+artefakUrl: "/data/proyek/soil-moisture/skematik-wiring.jpeg"
+---
+
+Skematik wiring di atas dibuat di Fritzing. FC-28 terhubung ke pin analog (ADC) ESP32, OLED lewat jalur I2C, satu push button jadi saklar daya seri dengan baterai, satu lagi ke pin GPIO untuk kontrol tampilan. Pin persis mengikuti gambar — cek langsung ke skematiknya kalau mau replikasi, karena penomoran pin ESP32 di foto lebih akurat daripada dijelaskan ulang di sini.
